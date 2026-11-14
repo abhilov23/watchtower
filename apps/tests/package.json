@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "vitest run",
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +16,7 @@
   },
   "dependencies": {
     "@watchtower/backend": "workspace:*",
-    "@watchtower/db": "workspace:*"
+    "@watchtower/db": "workspace:*",
+    "axios": "^1.21.1"
   }
 }
