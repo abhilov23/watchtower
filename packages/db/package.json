@@ -2,7 +2,8 @@
   "name": "@watchtower/db",
   "version": "1.0.0",
   "description": "Database layer for the Watchtower monorepo",
-  "main": "dist/index.js",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "type": "module",
   "scripts": {
     "db:generate": "prisma generate",
