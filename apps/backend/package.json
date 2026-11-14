@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsx index.ts"
+    "start": "tsx index.ts",
+    "dev": "nodemon --exec tsx index.ts"
   },
   "keywords": [],
   "author": "",
@@ -12,7 +13,8 @@
   "type": "module",
   "dependencies": {
     "@watchtower/db": "workspace:*",
-    "express": "^5.3.0"
+    "express": "^5.3.0",
+    "nodemon": "^3.1.14"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

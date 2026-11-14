@@ -1,10 +1,13 @@
 import express from "express";
+import userRouter from "./users";
 
 const app = express();
 
+app.use("/users", userRouter);
+
 
 app.get("/", (req, res)=>{
-    res.send("Hello World");
+    res.redirect("/users");
 })
 
 app.listen(3000, ()=>{
