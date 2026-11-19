@@ -13,8 +13,10 @@
   "type": "module",
   "dependencies": {
     "@watchtower/db": "workspace:*",
+    "dotenv": "^18.0.10",
     "express": "^5.3.0",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "redis": "^6.3.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
