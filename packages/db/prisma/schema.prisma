@@ -6,11 +6,23 @@ datasource db {
   provider = "sqlite"
 }
 
+
+model User {
+  id       String     @id   @default(uuid())
+  username String
+  password String
+  websites Website[]
+}
+
+
+
 model Website{
   id                  String       @id @default(uuid())
   url                 String
+  userId              String
   timeAdded           DateTime     @default(now())
-  ticks             websiteTick[] 
+  ticks               websiteTick[]
+  user                User              @relation(fields: [userId], references: [id])
 }
 
 model Region {
@@ -18,6 +30,9 @@ model Region {
   name                String
   ticks             websiteTick[]
 }
+
+
+
 
 model websiteTick {
   id                   String     @id @default(uuid())
@@ -27,6 +42,7 @@ model websiteTick {
   website            Website    @relation(fields: [websiteId], references: [id])
   regionId           String
   websiteId          String
+  createdAt          DateTime   @default(now())
 } 
 
 enum websiteStatus {
