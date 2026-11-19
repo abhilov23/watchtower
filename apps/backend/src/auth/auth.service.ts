@@ -12,7 +12,7 @@ import crypto from "crypto"
  * deleteSession() => deletes the session 
  */
 
-async function register(email : string, username : string, password : string ) : Promise<string> {
+export async function register(email : string, username : string, password : string ) : Promise<string> {
    
      const existingUser = await prismaClient.user.findFirst({
         where: {
@@ -42,7 +42,7 @@ async function register(email : string, username : string, password : string ) :
     return "success";
 }
 
-async function login(identifier : string, password: string) {
+export async function login(identifier : string, password: string) {
     
     const user = await prismaClient.user.findFirst({
         where:{
@@ -71,7 +71,7 @@ async function login(identifier : string, password: string) {
 
 
 
-async function createSession(userId:  string) : Promise<string>{
+ export async function createSession(userId:  string) : Promise<string>{
 
     const redis  = await getRedis();
     const sessionId  = crypto.randomBytes(32).toString("hex");
@@ -89,7 +89,7 @@ return sessionId;
 }
 
 
-async function validateSession(sessionId: string) : Promise<string | null> {
+  export async function validateSession(sessionId: string) : Promise<string | null> {
     const redis = await getRedis();
 
     const userId = await redis.get(
@@ -104,7 +104,7 @@ async function validateSession(sessionId: string) : Promise<string | null> {
 }
 
 
-async function deleteSession(sessionId : string) : Promise<void> {
+  export async function deleteSession(sessionId : string) : Promise<void> {
     const redis = await getRedis();
 
     await redis.del(`session:${sessionId}`);
