@@ -104,6 +104,8 @@ async function validateSession(sessionId: string) : Promise<string | null> {
 }
 
 
-async function deleteSession(sessionId : string) : Promise<string | null> {
-    
+async function deleteSession(sessionId : string) : Promise<void> {
+    const redis = await getRedis();
+
+    await redis.del(`session:${sessionId}`);
 }
