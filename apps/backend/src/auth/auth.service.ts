@@ -1,5 +1,5 @@
+import argon2 from "argon2";
 import { prismaClient } from '@watchtower/db';
-
 
 /**
  * register() => registers the user
@@ -9,12 +9,35 @@ import { prismaClient } from '@watchtower/db';
  * deleteSession() => deletes the session 
  */
 
-function register(email : string, username : string, password : string ) : string {
+async function register(email : string, username : string, password : string ) : Promise<string> {
    
-    prismaClient.user.create({
-        
+     const existingUser = await prismaClient.user.findFirst({
+        where: {
+            OR: [
+                { email },
+                { username }
+            ]
+        }
+    });
+    if(existingUser){
+        return "username or email already exist";
+    }
+    
+    const passwordHash = await argon2.hash(password);
+
+
+    const output = prismaClient.user.create({
+        data: {
+            email,
+            username, 
+            password : passwordHash
+        }
     })
    
 
     return "success";
+}
+
+async function login(identifier : string, password: string) : Promise<string> {
+
 }
