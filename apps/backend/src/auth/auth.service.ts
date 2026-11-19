@@ -1,3 +1,4 @@
+import { prismaClient } from '@watchtower/db';
 
 
 /**
@@ -7,3 +8,13 @@
  * validateSession() => validates the session 
  * deleteSession() => deletes the session 
  */
+
+function register(email : string, username : string, password : string ) : string {
+   
+    prismaClient.user.create({
+        
+    })
+   
+
+    return "success";
+}
