@@ -87,3 +87,23 @@ async function createSession(userId:  string) : Promise<string>{
 return sessionId;
 
 }
+
+
+async function validateSession(sessionId: string) : Promise<string | null> {
+    const redis = await getRedis();
+
+    const userId = await redis.get(
+        `session:${sessionId}`
+    )
+
+    if(!userId){
+        return null;
+    }
+
+    return userId;
+}
+
+
+async function deleteSession(sessionId : string) : Promise<string | null> {
+    
+}
