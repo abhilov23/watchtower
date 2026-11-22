@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { HttpMethod } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'node:url';
@@ -21,3 +22,5 @@ export const prismaClient = globalThis.prismaGlobal ?? new PrismaClient({ adapte
 if (process.env.NODE_ENV !== 'production') {
   globalThis.prismaGlobal = prismaClient;
 }
+
+export {HttpMethod};

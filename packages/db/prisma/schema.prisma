@@ -34,10 +34,8 @@ model Website {
   userId String
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Regions selected for monitoring
   regions WebsiteRegion[]
 
-  // Historical monitoring results
   ticks WebsiteTick[]
 
   createdAt DateTime @default(now())
@@ -48,9 +46,6 @@ model Website {
 }
 
 
-// ========================
-// REGION
-// ========================
 
 model Region {
   id      String  @id @default(uuid())
@@ -58,7 +53,6 @@ model Region {
   code    String  @unique
   enabled Boolean @default(true)
 
-  // Websites configured for this region
   websites WebsiteRegion[]
 
   // Historical checks from this region
