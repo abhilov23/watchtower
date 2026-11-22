@@ -7,47 +7,128 @@ datasource db {
 }
 
 
+
 model User {
-  id       String     @id   @default(uuid())
-  email    String     @unique
-  username String     @unique
+  id       String @id @default(uuid())
+  email    String @unique
+  username String @unique
   password String
+
   websites Website[]
 }
 
 
+model Website {
+  id     String @id @default(uuid())
+  name   String
+  url    String
 
-model Website{
-  id                  String       @id @default(uuid())
-  url                 String
-  userId              String
-  timeAdded           DateTime     @default(now())
-  ticks               websiteTick[]
-  user                User              @relation(fields: [userId], references: [id])
+  // Monitoring configuration
+  method             HttpMethod    @default(GET)
+  intervalSeconds    Int           @default(60)
+  timeoutMs          Int           @default(10000)
+  expectedStatusCode Int           @default(200)
+  monitorStatus      MonitorStatus @default(ACTIVE)
+
+  // Owner
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Regions selected for monitoring
+  regions WebsiteRegion[]
+
+  // Historical monitoring results
+  ticks WebsiteTick[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([monitorStatus])
 }
+
+
+// ========================
+// REGION
+// ========================
 
 model Region {
-  id                  String      @id @default(uuid())
-  name                String
-  ticks             websiteTick[]
+  id      String  @id @default(uuid())
+  name    String
+  code    String  @unique
+  enabled Boolean @default(true)
+
+  // Websites configured for this region
+  websites WebsiteRegion[]
+
+  // Historical checks from this region
+  ticks WebsiteTick[]
 }
 
 
+// ========================
+// WEBSITE <-> REGION
+// ========================
+
+model WebsiteRegion {
+  websiteId String
+  regionId  String
+
+  website Website @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  region  Region  @relation(fields: [regionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([websiteId, regionId])
+  @@index([regionId])
+}
 
 
-model websiteTick {
-  id                   String     @id @default(uuid())
-  response_time_ts     Int
-  status               websiteStatus
-  region             Region     @relation(fields: [regionId], references: [id])
-  website            Website    @relation(fields: [websiteId], references: [id])
-  regionId           String
-  websiteId          String
-  createdAt          DateTime   @default(now())
-} 
+// ========================
+// WEBSITE CHECK RESULT
+// ========================
 
-enum websiteStatus {
-  UP 
+model WebsiteTick {
+  id String @id @default(uuid())
+
+  responseTimeMs Int
+  status         WebsiteStatus
+  statusCode     Int?
+
+  regionId String
+  region   Region @relation(fields: [regionId], references: [id])
+
+  websiteId String
+  website   Website @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([websiteId, createdAt])
+  @@index([regionId, createdAt])
+  @@index([websiteId, regionId, createdAt])
+}
+
+
+// ========================
+// ENUMS
+// ========================
+
+enum WebsiteStatus {
+  UP
   DOWN
   UNKNOWN
+}
+
+enum MonitorStatus {
+  ACTIVE
+  PAUSED
+}
+
+enum HttpMethod {
+  GET
+  POST
+  PUT
+  PATCH
+  DELETE
+  HEAD
 }
