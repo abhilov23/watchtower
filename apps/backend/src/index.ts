@@ -1,7 +1,9 @@
 import express from "express";
 import type { ErrorRequestHandler } from "express";
 import cookieParser from "cookie-parser";
-import authRouter from "./auth/auth.routes";
+//import authRouter from "./auth/auth.routes";
+import authRouter from "./auth/auth.routes.js";
+
 
 const app = express();
 

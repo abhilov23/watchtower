@@ -1,5 +1,5 @@
 import {Request, Response} from "express";
-import {register, login, deleteSession} from "./auth.service";
+import { register, login, deleteSession } from "./auth.service.js";
 
 
 export async function registerController( req: Request, res: Response) {
