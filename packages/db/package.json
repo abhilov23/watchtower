@@ -9,7 +9,8 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "db:status": "prisma validate"
+    "db:status": "prisma validate",
+    "seed" : "tsx prisma/seed.ts"
   },
   "keywords": [
     "watchtower",
@@ -24,6 +25,7 @@
     "dotenv": "^18.0.10"
   },
   "devDependencies": {
-    "prisma": "^7.10.1"
+    "prisma": "^7.10.1",
+    "tsx": "^4.23.15"
   }
 }
