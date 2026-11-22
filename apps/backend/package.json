@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint --max-warnings 0",
     "start": "tsx src/index.ts",
     "dev": "nodemon --exec tsx src/index.ts"
   },
@@ -22,9 +23,12 @@
     "redis": "^6.3.1"
   },
   "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/node": "26.4.1",
+    "eslint": "10.9.1",
+    "globals": "17.12.0",
     "tsx": "^4.23.15",
     "typescript": "7.0.2"
   }
