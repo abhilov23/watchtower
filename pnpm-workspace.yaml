@@ -5,4 +5,5 @@ allowBuilds:
   '@prisma/engines': true
   argon2: false
   esbuild: false
+  msgpackr-extract: false
   prisma: true
