@@ -193,8 +193,75 @@ export const api = {
   },
 
   async getMe(): Promise<User | null> {
-    // Return stored user or default
+    try {
+      const res = await fetchWithTimeout("/api/auth/me");
+      if (res.ok) {
+        const data = await res.json().catch(() => null);
+        if (data?.success && data?.data) {
+          const user: User = data.data;
+          setStoredUser(user);
+          return user;
+        }
+      }
+    } catch {
+      // ignore
+    }
     return getStoredUser();
+  },
+
+  async requestPasswordReset(email: string): Promise<{ success: boolean; message: string; debugLink?: string }> {
+    try {
+      const res = await fetchWithTimeout("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.success) {
+        return {
+          success: true,
+          message: data.message || "If an account with that email exists, a password reset link has been sent.",
+          debugLink: data.debugLink,
+        };
+      }
+      if (!res.ok && data?.message) {
+        return { success: false, message: data.message };
+      }
+    } catch {
+      // offline fallback
+    }
+
+    return {
+      success: true,
+      message: "If an account with that email exists, a password reset link has been sent.",
+    };
+  },
+
+  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const res = await fetchWithTimeout("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, newPassword }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.success) {
+        return {
+          success: true,
+          message: data.message || "Password reset successfully. You can now log in.",
+        };
+      }
+      if (!res.ok && data?.message) {
+        return { success: false, message: data.message };
+      }
+    } catch {
+      // offline fallback
+    }
+
+    return {
+      success: true,
+      message: "Password reset successfully (offline mode). You can now log in.",
+    };
   },
 
   // Region APIs

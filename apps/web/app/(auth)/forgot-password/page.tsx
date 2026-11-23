@@ -3,21 +3,25 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Icons } from "../../../components/Icons";
+import { api } from "../../../lib/api";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [debugLink, setDebugLink] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-    }, 700);
+    const res = await api.requestPasswordReset(email);
+    setLoading(false);
+    if (res.debugLink) {
+      setDebugLink(res.debugLink);
+    }
+    setSubmitted(true);
   };
 
   return (
@@ -137,6 +141,22 @@ export default function ForgotPasswordPage() {
             <p style={{ fontSize: "13px", color: "#8F9BB7", lineHeight: 1.6, marginBottom: "22px" }}>
               We've dispatched password reset instructions to <strong style={{ color: "#FFF" }}>{email}</strong>.
             </p>
+            {debugLink && (
+              <div style={{
+                marginBottom: "20px",
+                padding: "10px 14px",
+                backgroundColor: "rgba(91, 99, 211, 0.12)",
+                border: "1px solid rgba(124, 135, 247, 0.3)",
+                borderRadius: "6px",
+                fontSize: "12px",
+                textAlign: "left",
+              }}>
+                <div style={{ color: "#7C87F7", fontWeight: 600, marginBottom: "4px" }}>Development Mode Direct Link:</div>
+                <Link href={debugLink} style={{ color: "#FFF", textDecoration: "underline", wordBreak: "break-all" }}>
+                  Click here to reset password directly →
+                </Link>
+              </div>
+            )}
             <Link href="/login" className="btn btn-secondary" style={{ width: "100%", height: "42px" }}>
               Back to Sign in
             </Link>

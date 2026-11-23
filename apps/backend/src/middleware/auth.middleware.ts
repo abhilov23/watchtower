@@ -6,23 +6,36 @@ export async function authMiddleware(
   res: Response,
   next: NextFunction,
 ) {
-  const sessionId = req.cookies?.sessionId;
+  try {
+    const bearer = req.headers["authorization"]?.startsWith("Bearer ")
+      ? req.headers["authorization"].split(" ")[1]
+      : undefined;
 
-  if (!sessionId) {
+    const sessionId = req.cookies?.sessionId || bearer;
+
+    if (!sessionId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const userId = await validateSession(sessionId);
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "InvalidSession",
+      });
+    }
+
+    req.userId = userId;
+
+    next();
+  } catch (error) {
     return res.status(401).json({
-      message: "Unauthorized",
+      success: false,
+      message: error instanceof Error ? error.message : "Authentication failed",
     });
   }
-
-  const userId = await validateSession(sessionId);
-
-  if (!userId) {
-    return res.status(401).json({
-      message: "InvalidSession",
-    });
-  }
-
-  req.userId = userId;
-
-  next();
 }

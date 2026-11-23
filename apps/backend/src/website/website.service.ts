@@ -1,7 +1,7 @@
 /**
 createWebsite() : creating a website in the Database
 getWebsites() : getting a website using userId
-getWebsiteById() : get a specific Wbsite using UserId and websiteId
+getWebsiteById() : get a specific Website using UserId and websiteId
 updateWebsite() : for updating the website details 
 deleteWebsite() : for deleting a website from the records
 pauseWebsite() : for pause monitoring a website  
@@ -20,7 +20,7 @@ interface CreateWebsiteInput {
   timeoutMs?: number;
   expectedStatusCode?: number;
 
-  regionIds: string[];
+  regionIds?: string[];
 }
 
 // schema for updating a website
@@ -35,18 +35,34 @@ interface UpdateWebsiteInput {
 
 // creating a website in the Database
 export async function createWebsite(userId: string, input: CreateWebsiteInput) {
+  if (!input.name || !input.url) {
+    throw new Error("Name and URL are required");
+  }
+
+  let targetRegionIds = input.regionIds;
+
+  // Fallback if no regionIds specified
+  if (!targetRegionIds || !Array.isArray(targetRegionIds) || targetRegionIds.length === 0) {
+    const available = await prismaClient.region.findMany({
+      where: { enabled: true },
+      take: 2,
+    });
+    if (available.length === 0) {
+      throw new Error("No enabled probe regions available");
+    }
+    targetRegionIds = available.map((r) => r.id);
+  }
+
   const regions = await prismaClient.region.findMany({
     where: {
       id: {
-        in: input.regionIds,
+        in: targetRegionIds,
       },
       enabled: true,
     },
   });
 
-  // If user sent 3 region IDs but only 2 valid regions were found,
-  // at least one region ID is invalid/disabled.
-  if (regions.length !== input.regionIds.length) {
+  if (regions.length !== targetRegionIds.length) {
     throw new Error("One or more regions are invalid or disabled");
   }
 
@@ -55,15 +71,15 @@ export async function createWebsite(userId: string, input: CreateWebsiteInput) {
       name: input.name,
       url: input.url,
 
-      method: input.method,
-      intervalSeconds: input.intervalSeconds,
-      timeoutMs: input.timeoutMs,
-      expectedStatusCode: input.expectedStatusCode,
+      method: input.method || "GET",
+      intervalSeconds: input.intervalSeconds || 60,
+      timeoutMs: input.timeoutMs || 10000,
+      expectedStatusCode: input.expectedStatusCode || 200,
 
       userId,
 
       regions: {
-        create: input.regionIds.map((regionId) => ({
+        create: targetRegionIds.map((regionId) => ({
           regionId,
         })),
       },
@@ -156,6 +172,13 @@ export async function updateWebsite(
       timeoutMs: input.timeoutMs,
       expectedStatusCode: input.expectedStatusCode,
     },
+    include: {
+      regions: {
+        include: {
+          region: true,
+        },
+      },
+    },
   });
 
   return updatedWebsite;
@@ -174,7 +197,7 @@ export async function deleteWebsite(userId: string, websiteId: string) {
   }
 
   // Delete the website
-  await prismaClient.website.delete({
+  const deleted = await prismaClient.website.delete({
     where: {
       id: websiteId,
     },
@@ -182,6 +205,7 @@ export async function deleteWebsite(userId: string, websiteId: string) {
 
   return {
     message: "Website deleted successfully",
+    website: deleted,
   };
 }
 
@@ -205,6 +229,13 @@ export async function pauseWebsite(userId: string, websiteId: string) {
     },
     data: {
       monitorStatus: "PAUSED",
+    },
+    include: {
+      regions: {
+        include: {
+          region: true,
+        },
+      },
     },
   });
 
@@ -231,6 +262,13 @@ export async function resumeWebsite(userId: string, websiteId: string) {
     },
     data: {
       monitorStatus: "ACTIVE",
+    },
+    include: {
+      regions: {
+        include: {
+          region: true,
+        },
+      },
     },
   });
 
