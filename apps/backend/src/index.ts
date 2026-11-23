@@ -15,17 +15,36 @@ import cookieParser from "cookie-parser";
 import authRouter from "./auth/auth.routes.js";
 import regionRouter from "./region/region.routes.js";
 import websiteRouter from "./website/website.routes.js";
+import {
+  csrfProtection,
+  csrfTokenHandler,
+} from "./middleware/csrf.middleware.js";
+import { idempotencyMiddleware } from "./middleware/idempotency.middleware.js";
+import { apiRateLimiter } from "./middleware/rate-limiter.middleware.js";
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
 
-// Health check endpoint
+// Public health check endpoint
 app.get("/api/health", (_req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+// Global API rate limiting
+app.use("/api", apiRateLimiter);
+
+// Endpoint to obtain or refresh CSRF token
+app.get("/api/csrf-token", csrfTokenHandler);
+
+// Cross-Site Request Forgery (CSRF) protection for mutating requests
+app.use(csrfProtection);
+
+// Idempotency support for mutating requests with Idempotency-Key
+app.use(idempotencyMiddleware);
+
+// Application routes
 app.use("/api/auth", authRouter);
 app.use("/api/regions", regionRouter);
 app.use("/api/websites", websiteRouter);

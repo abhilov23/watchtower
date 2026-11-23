@@ -16,19 +16,93 @@ import {
   saveStoredStatusPages,
 } from "./store";
 
+let cachedCsrfToken: string | null = null;
+
+export async function getCsrfToken(): Promise<string> {
+  if (cachedCsrfToken) return cachedCsrfToken;
+
+  if (typeof document !== "undefined") {
+    const match = document.cookie.match(/(?:^|;\s*)csrfToken=([^;]+)/);
+    if (match && match[1]) {
+      cachedCsrfToken = decodeURIComponent(match[1]);
+      return cachedCsrfToken;
+    }
+  }
+
+  try {
+    const res = await fetch("/api/csrf-token", { credentials: "include" });
+    if (res.ok) {
+      const data = await res.json().catch(() => null);
+      if (data?.csrfToken) {
+        cachedCsrfToken = data.csrfToken;
+        return data.csrfToken;
+      }
+    }
+  } catch (err) {
+    console.warn("[Watchtower Web] Failed to fetch CSRF token:", err);
+  }
+
+  return "";
+}
+
+export function generateIdempotencyKey(): string {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return (
+    "idem_" + Math.random().toString(36).substring(2) + Date.now().toString(36)
+  );
+}
+
 async function fetchWithTimeout(
   url: string,
   options: RequestInit = {},
-  timeoutMs = 4000,
+  timeoutMs = 5000,
 ) {
+  const method = (options.method || "GET").toUpperCase();
+  const headers = new Headers(options.headers || {});
+
+  // For state-changing methods, attach X-CSRF-Token automatically
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+    const token = await getCsrfToken();
+    if (token && !headers.has("X-CSRF-Token")) {
+      headers.set("X-CSRF-Token", token);
+    }
+  }
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(url, {
       credentials: "include",
       ...options,
+      headers,
       signal: controller.signal,
     });
+
+    const newCsrf = res.headers.get("x-csrf-token");
+    if (newCsrf) {
+      cachedCsrfToken = newCsrf;
+    }
+
+    // If 403 CSRF error occurs, refresh token once and retry
+    if (res.status === 403) {
+      const clone = res.clone();
+      const body = await clone.json().catch(() => null);
+      if (body?.code === "EBADCSRFTOKEN") {
+        cachedCsrfToken = null;
+        const fresh = await getCsrfToken();
+        if (fresh) {
+          headers.set("X-CSRF-Token", fresh);
+          return fetch(url, {
+            credentials: "include",
+            ...options,
+            headers,
+          });
+        }
+      }
+    }
+
     return res;
   } finally {
     clearTimeout(timeoutId);
@@ -295,7 +369,10 @@ export const api = {
     try {
       const res = await fetchWithTimeout("/api/auth/me", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": generateIdempotencyKey(),
+        },
         body: JSON.stringify(input),
       });
       const data = await res.json().catch(() => null);
@@ -339,7 +416,10 @@ export const api = {
     try {
       const res = await fetchWithTimeout("/api/auth/forgot-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": generateIdempotencyKey(),
+        },
         body: JSON.stringify({ email }),
       });
       const data = await res.json().catch(() => null);
@@ -373,7 +453,10 @@ export const api = {
     try {
       const res = await fetchWithTimeout("/api/auth/reset-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": generateIdempotencyKey(),
+        },
         body: JSON.stringify({ token, newPassword }),
       });
       const data = await res.json().catch(() => null);
@@ -494,7 +577,10 @@ export const api = {
   }): Promise<Website> {
     const res = await fetchWithTimeout("/api/websites", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Idempotency-Key": generateIdempotencyKey(),
+      },
       body: JSON.stringify(input),
     });
     const data = await res.json().catch(() => null);
@@ -531,7 +617,10 @@ export const api = {
   ): Promise<Website | null> {
     const res = await fetchWithTimeout(`/api/websites/${id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Idempotency-Key": generateIdempotencyKey(),
+      },
       body: JSON.stringify(input),
     });
     const data = await res.json().catch(() => null);
@@ -555,7 +644,12 @@ export const api = {
     const endpoint = isPaused
       ? `/api/websites/${id}/resume`
       : `/api/websites/${id}/pause`;
-    const res = await fetchWithTimeout(endpoint, { method: "POST" });
+    const res = await fetchWithTimeout(endpoint, {
+      method: "POST",
+      headers: {
+        "Idempotency-Key": generateIdempotencyKey(),
+      },
+    });
     const data = await res.json().catch(() => null);
     if (res.ok && data?.success && data?.data) {
       const enriched = enrichWebsite(data.data);
@@ -569,6 +663,9 @@ export const api = {
   async deleteWebsite(id: string): Promise<boolean> {
     const res = await fetchWithTimeout(`/api/websites/${id}`, {
       method: "DELETE",
+      headers: {
+        "Idempotency-Key": generateIdempotencyKey(),
+      },
     });
     if (res.ok) {
       const current = getStoredWebsites();
