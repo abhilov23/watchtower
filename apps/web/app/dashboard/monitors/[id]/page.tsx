@@ -7,6 +7,8 @@ import { DashboardHeader } from "../../../../components/DashboardHeader";
 import { LatencyChart } from "../../../../components/LatencyChart";
 import { UptimeTimeline } from "../../../../components/UptimeTimeline";
 import { Icons } from "../../../../components/Icons";
+import { EditMonitorModal } from "../../../../components/EditMonitorModal";
+import { RegionInspectModal } from "../../../../components/RegionInspectModal";
 import { api } from "../../../../lib/api";
 import { Website, User } from "../../../../lib/types";
 
@@ -16,6 +18,9 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   const [website, setWebsite] = useState<Website | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [inspectingRegionId, setInspectingRegionId] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -123,6 +128,12 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
             {/* Header actions */}
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <button
+                onClick={() => setEditModalOpen(true)}
+                className="btn btn-secondary btn-sm"
+              >
+                <Icons.Settings size={13} /> Configure
+              </button>
+              <button
                 onClick={handleTogglePause}
                 className="btn btn-secondary btn-sm"
               >
@@ -141,6 +152,24 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
               </button>
             </div>
           </div>
+
+          {toastMessage && (
+            <div style={{
+              backgroundColor: "rgba(16, 185, 129, 0.12)",
+              border: "1px solid rgba(16, 185, 129, 0.3)",
+              borderRadius: "8px",
+              padding: "10px 16px",
+              color: "#34D399",
+              fontSize: "13px",
+              marginBottom: "16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}>
+              <Icons.Check size={16} />
+              <span>{toastMessage}</span>
+            </div>
+          )}
 
           {/* KPI Stat strip */}
           <div style={{
@@ -228,12 +257,22 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "12px" }}>
             {website.regions && website.regions.length > 0 ? (
               website.regions.map((wr, idx) => (
-                <div key={idx} className="card-glow-hover" style={{
-                  padding: "14px",
-                  borderRadius: "var(--radius-md)",
-                  backgroundColor: "#0F121F",
-                  border: "1px solid rgba(114, 125, 161, 0.14)",
-                }}>
+                <div
+                  key={idx}
+                  className="card-glow-hover"
+                  onClick={() => setInspectingRegionId(wr.region?.id || wr.regionId)}
+                  title="Click to inspect probe node via GET /api/regions/:id"
+                  style={{
+                    padding: "14px",
+                    borderRadius: "var(--radius-md)",
+                    backgroundColor: "#0F121F",
+                    border: "1px solid rgba(114, 125, 161, 0.14)",
+                    cursor: "pointer",
+                    transition: "border-color 0.15s ease",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--primary-light)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(114, 125, 161, 0.14)")}
+                >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <span style={{ fontSize: "16px" }}>{wr.region?.flag || "🌐"}</span>
@@ -241,11 +280,14 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                     </div>
                     <span className="badge badge-green" style={{ fontSize: "11px" }}>Active</span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginTop: "10px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px", marginTop: "10px" }}>
                     <span style={{ color: "var(--text-dim)" }}>Edge Latency:</span>
-                    <strong style={{ fontFamily: "var(--font-mono)", color: "#FFFFFF" }}>
-                      {Math.floor(25 + idx * 18)} ms
-                    </strong>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <strong style={{ fontFamily: "var(--font-mono)", color: "#FFFFFF" }}>
+                        {Math.floor(25 + idx * 18)} ms
+                      </strong>
+                      <span style={{ color: "var(--primary-light)", fontSize: "11px" }}>Inspect ↗</span>
+                    </div>
                   </div>
                 </div>
               ))
@@ -298,6 +340,26 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
       </main>
+
+      {/* Edit Monitor Modal */}
+      {website && (
+        <EditMonitorModal
+          isOpen={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          website={website}
+          onUpdated={(updated) => {
+            setWebsite(updated);
+            setToastMessage("Monitor configuration updated successfully!");
+            setTimeout(() => setToastMessage(null), 3500);
+          }}
+        />
+      )}
+
+      {/* Inspect Region Modal */}
+      <RegionInspectModal
+        regionId={inspectingRegionId}
+        onClose={() => setInspectingRegionId(null)}
+      />
     </div>
   );
 }

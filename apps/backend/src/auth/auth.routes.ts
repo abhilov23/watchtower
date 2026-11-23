@@ -5,6 +5,7 @@ import {
   loginController,
   logoutController,
   meController,
+  updateProfileController,
   forgotPasswordController,
   resetPasswordController,
 } from "./auth.controller.js";
@@ -18,6 +19,7 @@ router.post("/register", registerController);
 router.post("/login", loginController);
 router.post("/logout", logoutController);
 router.get("/me", authMiddleware, meController);
+router.patch("/me", authMiddleware, updateProfileController);
 
 // Password Reset with Resend
 router.post("/forgot-password", forgotPasswordController);

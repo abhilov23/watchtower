@@ -1,4 +1,4 @@
-import { Website, Region, WebsiteTick, User } from "./types";
+import { Website, Region, WebsiteTick, User, StatusPage, PublicStatusPageData } from "./types";
 import { getStoredWebsites, saveStoredWebsites, DEFAULT_REGIONS, getStoredUser, setStoredUser } from "./store";
 
 async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 4000) {
@@ -215,6 +215,44 @@ export const api = {
     return null;
   },
 
+  async updateProfile(input: {
+    username?: string;
+    email?: string;
+    password?: string;
+  }): Promise<{ success: boolean; data?: User; message?: string }> {
+    try {
+      const res = await fetchWithTimeout("/api/auth/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      const data = await res.json().catch(() => null);
+
+      if (res.ok && data?.success && data?.data) {
+        const updated: User = data.data;
+        setStoredUser(updated);
+        return { success: true, data: updated, message: data.message || "Profile updated successfully" };
+      }
+
+      if (!res.ok && data?.message) {
+        return { success: false, message: data.message };
+      }
+    } catch {
+      // offline fallback
+      const current = getStoredUser();
+      if (current) {
+        const updated = {
+          ...current,
+          ...(input.username ? { username: input.username } : {}),
+          ...(input.email ? { email: input.email } : {}),
+        };
+        setStoredUser(updated);
+        return { success: true, data: updated, message: "Profile updated (offline mode)" };
+      }
+    }
+    return { success: false, message: "Failed to update profile" };
+  },
+
   async requestPasswordReset(email: string): Promise<{ success: boolean; message: string; debugLink?: string }> {
     try {
       const res = await fetchWithTimeout("/api/auth/forgot-password", {
@@ -290,6 +328,28 @@ export const api = {
       // ignore
     }
     return DEFAULT_REGIONS;
+  },
+
+  async getRegionById(id: string): Promise<Region | null> {
+    try {
+      const res = await fetchWithTimeout(`/api/regions/${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.success && data.data) {
+          const r = data.data;
+          return {
+            id: r.id,
+            name: r.name,
+            code: r.code,
+            enabled: r.enabled !== false,
+            flag: getRegionFlag(r.code),
+          };
+        }
+      }
+    } catch {
+      // fallback
+    }
+    return DEFAULT_REGIONS.find((r) => r.id === id) || null;
   },
 
   // Website APIs
@@ -483,5 +543,109 @@ export const api = {
     const updated = current.filter((w) => w.id !== id);
     saveStoredWebsites(updated);
     return true;
+  },
+
+  // Status Page APIs
+  async getStatusPages(): Promise<StatusPage[]> {
+    try {
+      const res = await fetchWithTimeout("/api/status-pages");
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.success && Array.isArray(data.data)) {
+          return data.data;
+        }
+      }
+    } catch {
+      // fallback
+    }
+    return [
+      {
+        id: "sp-default",
+        name: "Watchtower Live Status",
+        slug: "watchtower-live",
+        description: "Official real-time operational status for all Watchtower platform endpoints and edge clusters.",
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ];
+  },
+
+  async createStatusPage(input: {
+    name: string;
+    slug: string;
+    description?: string;
+    isPublished?: boolean;
+  }): Promise<StatusPage> {
+    const res = await fetchWithTimeout("/api/status-pages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    const data = await res.json().catch(() => null);
+
+    if (res.ok && data?.success && data?.data) {
+      return data.data;
+    }
+
+    if (!res.ok && data?.message) {
+      throw new Error(data.message);
+    }
+
+    return {
+      id: `sp-${Date.now()}`,
+      name: input.name,
+      slug: input.slug,
+      description: input.description || null,
+      isPublished: input.isPublished !== false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  },
+
+  async updateStatusPage(id: string, input: {
+    name?: string;
+    slug?: string;
+    description?: string;
+    isPublished?: boolean;
+  }): Promise<StatusPage | null> {
+    const res = await fetchWithTimeout(`/api/status-pages/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    const data = await res.json().catch(() => null);
+
+    if (res.ok && data?.success && data?.data) {
+      return data.data;
+    }
+
+    if (!res.ok && data?.message) {
+      throw new Error(data.message);
+    }
+
+    return null;
+  },
+
+  async deleteStatusPage(id: string): Promise<boolean> {
+    const res = await fetchWithTimeout(`/api/status-pages/${id}`, {
+      method: "DELETE",
+    });
+    return res.ok;
+  },
+
+  async getPublicStatusPage(slug: string): Promise<PublicStatusPageData | null> {
+    try {
+      const res = await fetchWithTimeout(`/api/status-pages/public/${slug}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.success && data.data) {
+          return data.data;
+        }
+      }
+    } catch {
+      // fallback
+    }
+    return null;
   },
 };

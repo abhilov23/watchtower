@@ -56,3 +56,32 @@ export interface User {
   username: string;
   email: string;
 }
+
+export interface StatusPage {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  isPublished: boolean;
+  userId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PublicStatusPageData {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  overallStatus: "OPERATIONAL" | "DEGRADED";
+  updatedAt: string;
+  monitors: Array<{
+    id: string;
+    name: string;
+    url: string;
+    method: string;
+    status: "UP" | "DOWN" | "UNKNOWN";
+    lastChecked: string;
+    responseTimeMs: number;
+  }>;
+}

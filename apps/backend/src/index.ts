@@ -15,6 +15,7 @@ import cookieParser from "cookie-parser";
 import authRouter from "./auth/auth.routes.js";
 import regionRouter from "./region/region.routes.js";
 import websiteRouter from "./website/website.routes.js";
+import statusPageRouter from "./status-page/status-page.routes.js";
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/regions", regionRouter);
 app.use("/api/websites", websiteRouter);
+app.use("/api/status-pages", statusPageRouter);
 
 const handleJsonErrors: ErrorRequestHandler = (error, _req, res, next) => {
   if (

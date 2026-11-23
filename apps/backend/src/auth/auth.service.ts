@@ -166,3 +166,53 @@ export async function resetPassword(
 
   return "success";
 }
+
+export async function updateProfile(
+  userId: string,
+  input: { username?: string; email?: string; password?: string }
+) {
+  const user = await prismaClient.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  if (input.email && input.email !== user.email) {
+    const existing = await prismaClient.user.findFirst({
+      where: { email: input.email, NOT: { id: userId } },
+    });
+    if (existing) {
+      throw new Error("Email is already taken by another account");
+    }
+  }
+
+  if (input.username && input.username !== user.username) {
+    const existing = await prismaClient.user.findFirst({
+      where: { username: input.username, NOT: { id: userId } },
+    });
+    if (existing) {
+      throw new Error("Username is already taken by another account");
+    }
+  }
+
+  const dataToUpdate: { username?: string; email?: string; password?: string } = {};
+  if (input.username?.trim()) dataToUpdate.username = input.username.trim();
+  if (input.email?.trim()) dataToUpdate.email = input.email.trim();
+  if (input.password && input.password.trim().length >= 6) {
+    dataToUpdate.password = await argon2.hash(input.password.trim());
+  }
+
+  const updated = await prismaClient.user.update({
+    where: { id: userId },
+    data: dataToUpdate,
+    select: {
+      id: true,
+      email: true,
+      username: true,
+    },
+  });
+
+  return updated;
+}

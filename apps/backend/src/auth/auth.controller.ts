@@ -6,6 +6,7 @@ import {
   getUserById,
   requestPasswordReset,
   resetPassword,
+  updateProfile,
 } from "./auth.service.js";
 
 export async function registerController(req: Request, res: Response) {
@@ -189,6 +190,32 @@ export async function resetPasswordController(req: Request, res: Response) {
     return res.status(500).json({
       success: false,
       message: error instanceof Error ? error.message : "Failed to reset password",
+    });
+  }
+}
+
+export async function updateProfileController(req: Request, res: Response) {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const { username, email, password } = req.body || {};
+    const updatedUser = await updateProfile(userId, { username, email, password });
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to update profile",
     });
   }
 }
