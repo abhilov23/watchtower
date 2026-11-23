@@ -129,7 +129,8 @@ export async function meController(req: Request, res: Response) {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : "Failed to fetch profile",
+      message:
+        error instanceof Error ? error.message : "Failed to fetch profile",
     });
   }
 }
@@ -149,14 +150,19 @@ export async function forgotPasswordController(req: Request, res: Response) {
 
     return res.status(200).json({
       success: true,
-      message: "If an account with that email exists, a password reset link has been sent.",
-      ...(process.env.NODE_ENV !== "production" && result.link ? { debugLink: result.link } : {}),
+      message:
+        "If an account with that email exists, a password reset link has been sent.",
+      ...(process.env.NODE_ENV !== "production" && result.link
+        ? { debugLink: result.link }
+        : {}),
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
       message:
-        error instanceof Error ? error.message : "Failed to process password reset",
+        error instanceof Error
+          ? error.message
+          : "Failed to process password reset",
     });
   }
 }
@@ -189,7 +195,8 @@ export async function resetPasswordController(req: Request, res: Response) {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : "Failed to reset password",
+      message:
+        error instanceof Error ? error.message : "Failed to reset password",
     });
   }
 }
@@ -205,7 +212,11 @@ export async function updateProfileController(req: Request, res: Response) {
     }
 
     const { username, email, password } = req.body || {};
-    const updatedUser = await updateProfile(userId, { username, email, password });
+    const updatedUser = await updateProfile(userId, {
+      username,
+      email,
+      password,
+    });
 
     return res.status(200).json({
       success: true,
@@ -215,7 +226,8 @@ export async function updateProfileController(req: Request, res: Response) {
   } catch (error) {
     return res.status(400).json({
       success: false,
-      message: error instanceof Error ? error.message : "Failed to update profile",
+      message:
+        error instanceof Error ? error.message : "Failed to update profile",
     });
   }
 }

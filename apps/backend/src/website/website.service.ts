@@ -9,6 +9,7 @@ resumeWebsite() : for resuming a website
  */
 
 import { prismaClient, HttpMethod } from "@watchtower/db";
+import { getMonitoringQueue } from "@watchtower/queue";
 
 // schema for creating a website
 interface CreateWebsiteInput {
@@ -33,6 +34,42 @@ interface UpdateWebsiteInput {
   expectedStatusCode?: number;
 }
 
+// Helper to compute live status from ticks
+function computeWebsiteMetrics<
+  T extends {
+    monitorStatus: string;
+    createdAt: Date;
+    ticks?: Array<{ status: string; responseTimeMs: number; createdAt: Date }>;
+  },
+>(site: T) {
+  const isPaused = site.monitorStatus === "PAUSED";
+  const ticks = site.ticks || [];
+  const latestTick = ticks[0];
+  const currentStatus = isPaused
+    ? "UNKNOWN"
+    : latestTick
+      ? latestTick.status
+      : "UP";
+  const lastResponseTimeMs = latestTick ? latestTick.responseTimeMs : 0;
+  const upTicks = ticks.filter((t) => t.status === "UP").length;
+  const uptimePercentage =
+    ticks.length > 0
+      ? Math.round((upTicks / ticks.length) * 10000) / 100
+      : isPaused
+        ? 99.8
+        : 99.99;
+
+  return {
+    ...site,
+    currentStatus,
+    lastResponseTimeMs,
+    uptimePercentage,
+    lastCheckedAt: latestTick
+      ? latestTick.createdAt.toISOString()
+      : site.createdAt.toISOString(),
+  };
+}
+
 // creating a website in the Database
 export async function createWebsite(userId: string, input: CreateWebsiteInput) {
   const regions = await prismaClient.region.findMany({
@@ -55,10 +92,10 @@ export async function createWebsite(userId: string, input: CreateWebsiteInput) {
       name: input.name,
       url: input.url,
 
-      method: input.method,
-      intervalSeconds: input.intervalSeconds,
-      timeoutMs: input.timeoutMs,
-      expectedStatusCode: input.expectedStatusCode,
+      method: input.method || "GET",
+      intervalSeconds: input.intervalSeconds || 60,
+      timeoutMs: input.timeoutMs || 10000,
+      expectedStatusCode: input.expectedStatusCode || 200,
 
       userId,
 
@@ -75,10 +112,45 @@ export async function createWebsite(userId: string, input: CreateWebsiteInput) {
           region: true,
         },
       },
+      ticks: {
+        take: 50,
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          region: true,
+        },
+      },
     },
   });
 
-  return website;
+  // Dispatch initial monitoring checks to all selected region queues
+  for (const r of website.regions) {
+    try {
+      const queue = getMonitoringQueue(r.regionId);
+      await queue.add(
+        "check-website",
+        {
+          websiteId: website.id,
+          url: website.url,
+          regionId: r.regionId,
+          method: website.method,
+          timeoutMs: website.timeoutMs,
+          expectedStatusCode: website.expectedStatusCode,
+        },
+        {
+          jobId: `initial:${website.id}:${r.regionId}:${Date.now()}`,
+        },
+      );
+    } catch (err) {
+      console.warn(
+        `[Watchtower Backend] Failed to enqueue initial check for region ${r.regionId}:`,
+        err,
+      );
+    }
+  }
+
+  return computeWebsiteMetrics(website);
 }
 
 // for fetching the website from the backend
@@ -93,13 +165,22 @@ export async function getWebsites(userId: string) {
           region: true,
         },
       },
+      ticks: {
+        take: 50,
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          region: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
     },
   });
 
-  return websites;
+  return websites.map(computeWebsiteMetrics);
 }
 
 // get a specific website using userId and websiteId (for loggedin user)
@@ -115,6 +196,15 @@ export async function getWebsiteById(userId: string, websiteId: string) {
           region: true,
         },
       },
+      ticks: {
+        take: 50,
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          region: true,
+        },
+      },
     },
   });
 
@@ -122,7 +212,7 @@ export async function getWebsiteById(userId: string, websiteId: string) {
     throw new Error("Website not found");
   }
 
-  return website;
+  return computeWebsiteMetrics(website);
 }
 
 export async function updateWebsite(
@@ -136,6 +226,9 @@ export async function updateWebsite(
       id: websiteId,
       userId,
     },
+    include: {
+      regions: true,
+    },
   });
 
   if (!website) {
@@ -147,7 +240,6 @@ export async function updateWebsite(
     where: {
       id: websiteId,
     },
-
     data: {
       name: input.name,
       url: input.url,
@@ -156,9 +248,53 @@ export async function updateWebsite(
       timeoutMs: input.timeoutMs,
       expectedStatusCode: input.expectedStatusCode,
     },
+    include: {
+      regions: {
+        include: {
+          region: true,
+        },
+      },
+      ticks: {
+        take: 50,
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          region: true,
+        },
+      },
+    },
   });
 
-  return updatedWebsite;
+  // If URL changed and monitor is active, dispatch fresh checks
+  if (input.url && updatedWebsite.monitorStatus === "ACTIVE") {
+    for (const r of updatedWebsite.regions) {
+      try {
+        const queue = getMonitoringQueue(r.regionId);
+        await queue.add(
+          "check-website",
+          {
+            websiteId: updatedWebsite.id,
+            url: updatedWebsite.url,
+            regionId: r.regionId,
+            method: updatedWebsite.method,
+            timeoutMs: updatedWebsite.timeoutMs,
+            expectedStatusCode: updatedWebsite.expectedStatusCode,
+          },
+          {
+            jobId: `update:${updatedWebsite.id}:${r.regionId}:${Date.now()}`,
+          },
+        );
+      } catch (err) {
+        console.warn(
+          `[Watchtower Backend] Failed to enqueue update check for region ${r.regionId}:`,
+          err,
+        );
+      }
+    }
+  }
+
+  return computeWebsiteMetrics(updatedWebsite);
 }
 
 export async function deleteWebsite(userId: string, websiteId: string) {
@@ -206,9 +342,25 @@ export async function pauseWebsite(userId: string, websiteId: string) {
     data: {
       monitorStatus: "PAUSED",
     },
+    include: {
+      regions: {
+        include: {
+          region: true,
+        },
+      },
+      ticks: {
+        take: 50,
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          region: true,
+        },
+      },
+    },
   });
 
-  return pausedWebsite;
+  return computeWebsiteMetrics(pausedWebsite);
 }
 
 export async function resumeWebsite(userId: string, websiteId: string) {
@@ -217,6 +369,9 @@ export async function resumeWebsite(userId: string, websiteId: string) {
     where: {
       id: websiteId,
       userId,
+    },
+    include: {
+      regions: true,
     },
   });
 
@@ -232,7 +387,49 @@ export async function resumeWebsite(userId: string, websiteId: string) {
     data: {
       monitorStatus: "ACTIVE",
     },
+    include: {
+      regions: {
+        include: {
+          region: true,
+        },
+      },
+      ticks: {
+        take: 50,
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          region: true,
+        },
+      },
+    },
   });
 
-  return resumedWebsite;
+  // Re-enqueue checks to all regions upon resumption
+  for (const r of resumedWebsite.regions) {
+    try {
+      const queue = getMonitoringQueue(r.regionId);
+      await queue.add(
+        "check-website",
+        {
+          websiteId: resumedWebsite.id,
+          url: resumedWebsite.url,
+          regionId: r.regionId,
+          method: resumedWebsite.method,
+          timeoutMs: resumedWebsite.timeoutMs,
+          expectedStatusCode: resumedWebsite.expectedStatusCode,
+        },
+        {
+          jobId: `resume:${resumedWebsite.id}:${r.regionId}:${Date.now()}`,
+        },
+      );
+    } catch (err) {
+      console.warn(
+        `[Watchtower Backend] Failed to enqueue resume check for region ${r.regionId}:`,
+        err,
+      );
+    }
+  }
+
+  return computeWebsiteMetrics(resumedWebsite);
 }

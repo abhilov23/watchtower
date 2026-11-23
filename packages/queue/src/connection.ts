@@ -17,11 +17,14 @@ export function createQueueConnection(customUrl?: string): Redis {
   });
 }
 
-export const queueConnection: Redis = new Redis(redisUrl || "redis://localhost:6379", {
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-  lazyConnect: true,
-});
+export const queueConnection: Redis = new Redis(
+  redisUrl || "redis://localhost:6379",
+  {
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
+    lazyConnect: true,
+  },
+);
 
 queueConnection.on("error", (err) => {
   console.error("[Watchtower Queue Redis] Error:", err);

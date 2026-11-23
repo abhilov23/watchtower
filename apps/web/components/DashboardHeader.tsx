@@ -29,90 +29,141 @@ export function DashboardHeader({
 
   const navLinks = [
     { label: "Monitors", href: "/dashboard", icon: Icons.Activity },
-    { label: "Status Pages", href: "/dashboard/status-pages", icon: Icons.Globe },
+    {
+      label: "Status Pages",
+      href: "/dashboard/status-pages",
+      icon: Icons.Globe,
+    },
     { label: "Settings", href: "/dashboard/settings", icon: Icons.Settings },
   ];
 
   return (
-    <header style={{
-      backgroundColor: "#090A12",
-      borderBottom: "1px solid rgba(114, 125, 161, 0.15)",
-      position: "sticky",
-      top: 0,
-      zIndex: 50,
-    }}>
+    <header
+      style={{
+        backgroundColor: "#090A12",
+        borderBottom: "1px solid rgba(114, 125, 161, 0.15)",
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+      }}
+    >
       {/* Top tier */}
-      <div className="container" style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        height: "58px",
-      }}>
+      <div
+        className="container"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: "58px",
+        }}
+      >
         {/* Brand */}
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <Link
+            href="/"
+            style={{ display: "flex", alignItems: "center", gap: "10px" }}
+          >
             <svg width="20" height="16" viewBox="0 0 24 20" fill="none">
-              <rect x="0" y="2" width="7" height="16" rx="3.5" transform="rotate(-15 0 2)" fill="#FFFFFF" />
-              <rect x="11" y="2" width="7" height="16" rx="3.5" transform="rotate(-15 11 2)" fill="#FFFFFF" />
+              <rect
+                x="0"
+                y="2"
+                width="7"
+                height="16"
+                rx="3.5"
+                transform="rotate(-15 0 2)"
+                fill="#FFFFFF"
+              />
+              <rect
+                x="11"
+                y="2"
+                width="7"
+                height="16"
+                rx="3.5"
+                transform="rotate(-15 11 2)"
+                fill="#FFFFFF"
+              />
             </svg>
-            <span style={{ fontWeight: 700, fontSize: "16px", color: "#FFFFFF" }}>
+            <span
+              style={{ fontWeight: 700, fontSize: "16px", color: "#FFFFFF" }}
+            >
               Watchtower
             </span>
           </Link>
 
           {/* Operational Pill */}
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            backgroundColor: downCount > 0 ? "rgba(244, 63, 94, 0.12)" : "rgba(16, 185, 129, 0.12)",
-            border: `1px solid ${downCount > 0 ? "rgba(244, 63, 94, 0.25)" : "rgba(16, 185, 129, 0.25)"}`,
-            padding: "3px 10px",
-            borderRadius: "9999px",
-            fontSize: "12px",
-            fontWeight: 500,
-            color: downCount > 0 ? "#FB7185" : "#34D399",
-          }}>
-            <span className={`pulse-dot ${downCount > 0 ? "pulse-dot-red" : "pulse-dot-green"}`} />
-            <span>{downCount > 0 ? `${downCount} Monitor Failing` : "All systems normal"}</span>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              backgroundColor:
+                downCount > 0
+                  ? "rgba(244, 63, 94, 0.12)"
+                  : "rgba(16, 185, 129, 0.12)",
+              border: `1px solid ${downCount > 0 ? "rgba(244, 63, 94, 0.25)" : "rgba(16, 185, 129, 0.25)"}`,
+              padding: "3px 10px",
+              borderRadius: "9999px",
+              fontSize: "12px",
+              fontWeight: 500,
+              color: downCount > 0 ? "#FB7185" : "#34D399",
+            }}
+          >
+            <span
+              className={`pulse-dot ${downCount > 0 ? "pulse-dot-red" : "pulse-dot-green"}`}
+            />
+            <span>
+              {downCount > 0
+                ? `${downCount} Monitor Failing`
+                : "All systems normal"}
+            </span>
           </div>
         </div>
 
         {/* Right side Actions */}
         <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
           {onOpenCreateModal && (
-            <button className="cta-button btn btn-sm" onClick={onOpenCreateModal} style={{ height: "32px", fontSize: "13px" }}>
+            <button
+              className="cta-button btn btn-sm"
+              onClick={onOpenCreateModal}
+              style={{ height: "32px", fontSize: "13px" }}
+            >
               <Icons.Plus size={15} /> Create monitor
             </button>
           )}
 
           {/* User profile & Exit button */}
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              height: "32px",
-              padding: "0 10px",
-              borderRadius: "6px",
-              backgroundColor: "rgba(114, 125, 161, 0.08)",
-              border: "1px solid rgba(114, 125, 161, 0.18)",
-            }}>
-              <div style={{
-                width: "20px",
-                height: "20px",
-                borderRadius: "50%",
-                backgroundColor: "var(--primary-color)",
-                color: "#FFFFFF",
+            <div
+              style={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                fontSize: "11px",
-                fontWeight: 700,
-              }}>
+                gap: "8px",
+                height: "32px",
+                padding: "0 10px",
+                borderRadius: "6px",
+                backgroundColor: "rgba(114, 125, 161, 0.08)",
+                border: "1px solid rgba(114, 125, 161, 0.18)",
+              }}
+            >
+              <div
+                style={{
+                  width: "20px",
+                  height: "20px",
+                  borderRadius: "50%",
+                  backgroundColor: "var(--primary-color)",
+                  color: "#FFFFFF",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                }}
+              >
                 {((user?.username || "U")[0] || "U").toUpperCase()}
               </div>
-              <span style={{ fontSize: "13px", fontWeight: 500, color: "#FFFFFF" }}>
+              <span
+                style={{ fontSize: "13px", fontWeight: 500, color: "#FFFFFF" }}
+              >
                 {user?.username || "Account"}
               </span>
             </div>
@@ -163,7 +214,9 @@ export function DashboardHeader({
                   fontSize: "13px",
                   fontWeight: 500,
                   color: isActive ? "#FFFFFF" : "var(--text-nav)",
-                  borderBottom: isActive ? "2px solid var(--primary-light)" : "2px solid transparent",
+                  borderBottom: isActive
+                    ? "2px solid var(--primary-light)"
+                    : "2px solid transparent",
                   transition: "all 0.15s ease",
                 }}
               >

@@ -11,7 +11,11 @@ interface CreateStatusPageModalProps {
   onCreated: (page: StatusPage) => void;
 }
 
-export function CreateStatusPageModal({ isOpen, onClose, onCreated }: CreateStatusPageModalProps) {
+export function CreateStatusPageModal({
+  isOpen,
+  onClose,
+  onCreated,
+}: CreateStatusPageModalProps) {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
@@ -22,8 +26,20 @@ export function CreateStatusPageModal({ isOpen, onClose, onCreated }: CreateStat
 
   const handleNameChange = (val: string) => {
     setName(val);
-    if (!slug || slug === val.slice(0, -1).toLowerCase().replace(/[^a-z0-9]+/g, "-")) {
-      setSlug(val.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""));
+    if (
+      !slug ||
+      slug ===
+        val
+          .slice(0, -1)
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+    ) {
+      setSlug(
+        val
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, ""),
+      );
     }
   };
 
@@ -62,54 +78,80 @@ export function CreateStatusPageModal({ isOpen, onClose, onCreated }: CreateStat
   };
 
   return (
-    <div style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "rgba(7, 8, 13, 0.78)",
-      backdropFilter: "blur(6px)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 1000,
-      padding: "20px",
-    }}>
-      <div className="card" style={{
-        width: "100%",
-        maxWidth: "500px",
-        padding: "28px",
-        backgroundColor: "#0D0F1A",
-        border: "1px solid rgba(114, 125, 161, 0.25)",
-        borderRadius: "12px",
-        boxShadow: "0 24px 60px rgba(0, 0, 0, 0.6)",
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(7, 8, 13, 0.78)",
+        backdropFilter: "blur(6px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+        padding: "20px",
+      }}
+    >
+      <div
+        className="card"
+        style={{
+          width: "100%",
+          maxWidth: "500px",
+          padding: "28px",
+          backgroundColor: "#0D0F1A",
+          border: "1px solid rgba(114, 125, 161, 0.25)",
+          borderRadius: "12px",
+          boxShadow: "0 24px 60px rgba(0, 0, 0, 0.6)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: "20px",
+          }}
+        >
           <div>
-            <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#FFFFFF" }}>Create Status Page</h2>
-            <p style={{ color: "var(--text-dim)", fontSize: "13px", marginTop: "4px" }}>
+            <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#FFFFFF" }}>
+              Create Status Page
+            </h2>
+            <p
+              style={{
+                color: "var(--text-dim)",
+                fontSize: "13px",
+                marginTop: "4px",
+              }}
+            >
               Publish a public incident and uptime page for your end users.
             </p>
           </div>
-          <button onClick={onClose} className="btn-ghost" style={{ padding: "4px", color: "var(--text-dim)" }}>
+          <button
+            onClick={onClose}
+            className="btn-ghost"
+            style={{ padding: "4px", color: "var(--text-dim)" }}
+          >
             <Icons.X size={18} />
           </button>
         </div>
 
         {error && (
-          <div style={{
-            backgroundColor: "rgba(244, 63, 94, 0.12)",
-            border: "1px solid rgba(244, 63, 94, 0.3)",
-            borderRadius: "6px",
-            padding: "10px 14px",
-            color: "#FB7185",
-            fontSize: "13px",
-            marginBottom: "16px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}>
+          <div
+            style={{
+              backgroundColor: "rgba(244, 63, 94, 0.12)",
+              border: "1px solid rgba(244, 63, 94, 0.3)",
+              borderRadius: "6px",
+              padding: "10px 14px",
+              color: "#FB7185",
+              fontSize: "13px",
+              marginBottom: "16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
             <Icons.AlertTriangle size={15} />
             <span>{error}</span>
           </div>
@@ -131,28 +173,36 @@ export function CreateStatusPageModal({ isOpen, onClose, onCreated }: CreateStat
           <div className="form-group">
             <label className="form-label">URL Slug</label>
             <div style={{ display: "flex", alignItems: "center" }}>
-              <span style={{
-                backgroundColor: "rgba(17, 20, 34, 0.9)",
-                border: "1px solid rgba(114, 125, 161, 0.25)",
-                borderRight: "none",
-                borderRadius: "var(--radius-sm) 0 0 var(--radius-sm)",
-                padding: "0 10px",
-                height: "38px",
-                display: "flex",
-                alignItems: "center",
-                color: "var(--text-dim)",
-                fontSize: "13px",
-                fontFamily: "var(--font-mono)",
-              }}>
+              <span
+                style={{
+                  backgroundColor: "rgba(17, 20, 34, 0.9)",
+                  border: "1px solid rgba(114, 125, 161, 0.25)",
+                  borderRight: "none",
+                  borderRadius: "var(--radius-sm) 0 0 var(--radius-sm)",
+                  padding: "0 10px",
+                  height: "38px",
+                  display: "flex",
+                  alignItems: "center",
+                  color: "var(--text-dim)",
+                  fontSize: "13px",
+                  fontFamily: "var(--font-mono)",
+                }}
+              >
                 /status/
               </span>
               <input
                 type="text"
                 className="form-input font-mono"
                 value={slug}
-                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, ""))}
+                onChange={(e) =>
+                  setSlug(
+                    e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, ""),
+                  )
+                }
                 placeholder="acme-cloud"
-                style={{ borderRadius: "0 var(--radius-sm) var(--radius-sm) 0" }}
+                style={{
+                  borderRadius: "0 var(--radius-sm) var(--radius-sm) 0",
+                }}
                 required
               />
             </div>
@@ -170,7 +220,9 @@ export function CreateStatusPageModal({ isOpen, onClose, onCreated }: CreateStat
             />
           </div>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+          <div
+            style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}
+          >
             <button
               type="button"
               className="btn btn-secondary"
@@ -179,11 +231,7 @@ export function CreateStatusPageModal({ isOpen, onClose, onCreated }: CreateStat
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="cta-button btn"
-              disabled={loading}
-            >
+            <button type="submit" className="cta-button btn" disabled={loading}>
               {loading ? "Creating..." : "Publish Status Page"}
             </button>
           </div>

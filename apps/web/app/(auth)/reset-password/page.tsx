@@ -47,19 +47,37 @@ function ResetPasswordForm() {
   };
 
   return (
-    <main style={{
-      position: "relative",
-      zIndex: 1,
-      width: "100%",
-      maxWidth: "380px",
-      margin: "0 auto",
-      textAlign: "center",
-    }}>
+    <main
+      style={{
+        position: "relative",
+        zIndex: 1,
+        width: "100%",
+        maxWidth: "380px",
+        margin: "0 auto",
+        textAlign: "center",
+      }}
+    >
       {/* Brand Icon */}
       <div style={{ marginBottom: "28px", display: "inline-block" }}>
         <svg width="34" height="28" viewBox="0 0 24 20" fill="none">
-          <rect x="0" y="2" width="7" height="16" rx="3.5" transform="rotate(-15 0 2)" fill="url(#silverGrad1)" />
-          <rect x="11" y="2" width="7" height="16" rx="3.5" transform="rotate(-15 11 2)" fill="url(#silverGrad2)" />
+          <rect
+            x="0"
+            y="2"
+            width="7"
+            height="16"
+            rx="3.5"
+            transform="rotate(-15 0 2)"
+            fill="url(#silverGrad1)"
+          />
+          <rect
+            x="11"
+            y="2"
+            width="7"
+            height="16"
+            rx="3.5"
+            transform="rotate(-15 11 2)"
+            fill="url(#silverGrad2)"
+          />
           <defs>
             <linearGradient id="silverGrad1" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stopColor="#FFFFFF" />
@@ -73,61 +91,101 @@ function ResetPasswordForm() {
         </svg>
       </div>
 
-      <h1 style={{
-        fontSize: "30px",
-        fontWeight: 700,
-        color: "#FFFFFF",
-        letterSpacing: "-0.02em",
-        marginBottom: "8px",
-      }}>
+      <h1
+        style={{
+          fontSize: "30px",
+          fontWeight: 700,
+          color: "#FFFFFF",
+          letterSpacing: "-0.02em",
+          marginBottom: "8px",
+        }}
+      >
         Set new password
       </h1>
-      <p style={{
-        fontSize: "14px",
-        color: "#8F9BB7",
-        lineHeight: 1.5,
-        marginBottom: "32px",
-      }}>
+      <p
+        style={{
+          fontSize: "14px",
+          color: "#8F9BB7",
+          lineHeight: 1.5,
+          marginBottom: "32px",
+        }}
+      >
         Your new password must be at least 6 characters long.
       </p>
 
       {error && (
-        <div style={{
-          padding: "10px 14px",
-          marginBottom: "20px",
-          borderRadius: "6px",
-          backgroundColor: "rgba(244, 63, 94, 0.12)",
-          border: "1px solid rgba(244, 63, 94, 0.25)",
-          color: "#FB7185",
-          fontSize: "13px",
-          textAlign: "left",
-        }}>
+        <div
+          style={{
+            padding: "10px 14px",
+            marginBottom: "20px",
+            borderRadius: "6px",
+            backgroundColor: "rgba(244, 63, 94, 0.12)",
+            border: "1px solid rgba(244, 63, 94, 0.25)",
+            color: "#FB7185",
+            fontSize: "13px",
+            textAlign: "left",
+          }}
+        >
           {error}
         </div>
       )}
 
       {success ? (
-        <div className="card" style={{ padding: "32px 24px", textAlign: "center", backgroundColor: "rgba(13, 15, 26, 0.75)" }}>
-          <div style={{
-            width: "44px",
-            height: "44px",
-            borderRadius: "50%",
-            backgroundColor: "rgba(16, 185, 129, 0.15)",
-            color: "#34D399",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: "0 auto 16px",
-          }}>
+        <div
+          className="card"
+          style={{
+            padding: "32px 24px",
+            textAlign: "center",
+            backgroundColor: "rgba(13, 15, 26, 0.75)",
+          }}
+        >
+          <div
+            style={{
+              width: "44px",
+              height: "44px",
+              borderRadius: "50%",
+              backgroundColor: "rgba(16, 185, 129, 0.15)",
+              color: "#34D399",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 16px",
+            }}
+          >
             <Icons.CheckCircle2 size={24} />
           </div>
-          <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#FFFFFF", marginBottom: "8px" }}>
+          <h3
+            style={{
+              fontSize: "16px",
+              fontWeight: 700,
+              color: "#FFFFFF",
+              marginBottom: "8px",
+            }}
+          >
             Password updated
           </h3>
-          <p style={{ fontSize: "13px", color: "#8F9BB7", lineHeight: 1.6, marginBottom: "24px" }}>
-            Your account password has been reset successfully. You can now log in with your new credentials.
+          <p
+            style={{
+              fontSize: "13px",
+              color: "#8F9BB7",
+              lineHeight: 1.6,
+              marginBottom: "24px",
+            }}
+          >
+            Your account password has been reset successfully. You can now log
+            in with your new credentials.
           </p>
-          <Link href="/login" className="cta-button btn" style={{ width: "100%", height: "44px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+          <Link
+            href="/login"
+            className="cta-button btn"
+            style={{
+              width: "100%",
+              height: "44px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             Sign in to Watchtower
           </Link>
         </div>
@@ -135,7 +193,15 @@ function ResetPasswordForm() {
         <form onSubmit={handleSubmit} style={{ textAlign: "left" }}>
           {!tokenFromUrl && (
             <div style={{ marginBottom: "16px" }}>
-              <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "#8F9BB7", marginBottom: "6px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  color: "#8F9BB7",
+                  marginBottom: "6px",
+                }}
+              >
                 Reset Token
               </label>
               <input
@@ -161,7 +227,15 @@ function ResetPasswordForm() {
           )}
 
           <div style={{ marginBottom: "16px" }}>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "#8F9BB7", marginBottom: "6px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "#8F9BB7",
+                marginBottom: "6px",
+              }}
+            >
               New Password
             </label>
             <input
@@ -185,7 +259,15 @@ function ResetPasswordForm() {
           </div>
 
           <div style={{ marginBottom: "22px" }}>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "#8F9BB7", marginBottom: "6px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "#8F9BB7",
+                marginBottom: "6px",
+              }}
+            >
               Confirm New Password
             </label>
             <input
@@ -236,29 +318,34 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "space-between",
-      padding: "28px 24px 32px",
-      backgroundColor: "#07080D",
-      position: "relative",
-      overflow: "hidden",
-    }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        padding: "28px 24px 32px",
+        backgroundColor: "#07080D",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       {/* Background Soft Flare */}
-      <div style={{
-        position: "absolute",
-        top: "20%",
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: "700px",
-        height: "400px",
-        background: "radial-gradient(circle at 50% 50%, rgba(91, 99, 211, 0.12) 0%, rgba(124, 135, 247, 0.03) 50%, transparent 70%)",
-        filter: "blur(60px)",
-        pointerEvents: "none",
-        zIndex: 0,
-      }} />
+      <div
+        style={{
+          position: "absolute",
+          top: "20%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "700px",
+          height: "400px",
+          background:
+            "radial-gradient(circle at 50% 50%, rgba(91, 99, 211, 0.12) 0%, rgba(124, 135, 247, 0.03) 50%, transparent 70%)",
+          filter: "blur(60px)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
 
       {/* Top Left Navigation Link */}
       <div style={{ position: "relative", zIndex: 1 }}>
@@ -281,32 +368,49 @@ export default function ResetPasswordPage() {
         </Link>
       </div>
 
-      <Suspense fallback={
-        <div style={{ textAlign: "center", color: "#8F9BB7", position: "relative", zIndex: 1 }}>
-          Loading password reset...
-        </div>
-      }>
+      <Suspense
+        fallback={
+          <div
+            style={{
+              textAlign: "center",
+              color: "#8F9BB7",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            Loading password reset...
+          </div>
+        }
+      >
         <ResetPasswordForm />
       </Suspense>
 
       {/* Minimal Footer */}
-      <footer style={{
-        position: "relative",
-        zIndex: 1,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        fontSize: "12px",
-        color: "#555E75",
-        maxWidth: "680px",
-        width: "100%",
-        margin: "0 auto",
-      }}>
+      <footer
+        style={{
+          position: "relative",
+          zIndex: 1,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          fontSize: "12px",
+          color: "#555E75",
+          maxWidth: "680px",
+          width: "100%",
+          margin: "0 auto",
+        }}
+      >
         <span>© {new Date().getFullYear()} Watchtower Inc.</span>
         <div style={{ display: "flex", gap: "16px" }}>
-          <Link href="/#terms" style={{ color: "#555E75" }}>Terms</Link>
-          <Link href="/#privacy" style={{ color: "#555E75" }}>Privacy</Link>
-          <Link href="/#security" style={{ color: "#555E75" }}>Security</Link>
+          <Link href="/#terms" style={{ color: "#555E75" }}>
+            Terms
+          </Link>
+          <Link href="/#privacy" style={{ color: "#555E75" }}>
+            Privacy
+          </Link>
+          <Link href="/#security" style={{ color: "#555E75" }}>
+            Security
+          </Link>
         </div>
       </footer>
     </div>

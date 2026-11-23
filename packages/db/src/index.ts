@@ -1,10 +1,14 @@
-import { PrismaClient } from '@prisma/client';
-import { HttpMethod } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'node:url';
+import {
+  PrismaClient,
+  HttpMethod,
+  WebsiteStatus,
+  MonitorStatus,
+} from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import dotenv from "dotenv";
+import { fileURLToPath } from "node:url";
 
-dotenv.config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
+dotenv.config({ path: fileURLToPath(new URL("../.env", import.meta.url)) });
 
 declare global {
   var prismaGlobal: PrismaClient | undefined;
@@ -13,14 +17,15 @@ declare global {
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
-  throw new Error('DATABASE_URL must be set to connect to PostgreSQL.');
+  throw new Error("DATABASE_URL must be set to connect to PostgreSQL.");
 }
 
 const adapter = new PrismaPg({ connectionString });
-export const prismaClient = globalThis.prismaGlobal ?? new PrismaClient({ adapter });
+export const prismaClient =
+  globalThis.prismaGlobal ?? new PrismaClient({ adapter });
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   globalThis.prismaGlobal = prismaClient;
 }
 
-export {HttpMethod};
+export { HttpMethod, WebsiteStatus, MonitorStatus, PrismaClient };

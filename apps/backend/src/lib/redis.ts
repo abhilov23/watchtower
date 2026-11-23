@@ -1,1 +1,6 @@
-export { getRedis, redis, createClient, type RedisClient } from "@watchtower/redis";
+export {
+  getRedis,
+  redis,
+  createClient,
+  type RedisClient,
+} from "@watchtower/redis";

@@ -1,0 +1,41 @@
+# Watchtower Multi-Region Workers Compose
+# Deploys independent worker containers simulating different edge regions
+services:
+  worker-mumbai:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    container_name: watchtower-worker-mumbai
+    restart: unless-stopped
+    environment:
+      - REGION_CODE=ap-south-1
+      - DATABASE_URL=${DATABASE_URL:-postgresql://neondb_owner:npg_u8o3WdglGqCL@ep-quiet-grass-a1w1z376-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require}
+      - REDIS_URL=${REDIS_URL:-rediss://default:gQAAAAAAAfFlAAIgcDE5Yzc4NGY5NDg1ZGQ0YTIzOWZlMjYzOThkYzExMTk4ZQ@expert-wombat-127333.upstash.io:6379}
+      - CONCURRENCY=10
+      - POLL_INTERVAL_SECONDS=15
+
+  worker-virginia:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    container_name: watchtower-worker-virginia
+    restart: unless-stopped
+    environment:
+      - REGION_CODE=us-east-1
+      - DATABASE_URL=${DATABASE_URL:-postgresql://neondb_owner:npg_u8o3WdglGqCL@ep-quiet-grass-a1w1z376-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require}
+      - REDIS_URL=${REDIS_URL:-rediss://default:gQAAAAAAAfFlAAIgcDE5Yzc4NGY5NDg1ZGQ0YTIzOWZlMjYzOThkYzExMTk4ZQ@expert-wombat-127333.upstash.io:6379}
+      - CONCURRENCY=10
+      - POLL_INTERVAL_SECONDS=15
+
+  worker-frankfurt:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    container_name: watchtower-worker-frankfurt
+    restart: unless-stopped
+    environment:
+      - REGION_CODE=eu-central-1
+      - DATABASE_URL=${DATABASE_URL:-postgresql://neondb_owner:npg_u8o3WdglGqCL@ep-quiet-grass-a1w1z376-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require}
+      - REDIS_URL=${REDIS_URL:-rediss://default:gQAAAAAAAfFlAAIgcDE5Yzc4NGY5NDg1ZGQ0YTIzOWZlMjYzOThkYzExMTk4ZQ@expert-wombat-127333.upstash.io:6379}
+      - CONCURRENCY=10
+      - POLL_INTERVAL_SECONDS=15

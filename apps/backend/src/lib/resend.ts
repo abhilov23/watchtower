@@ -27,7 +27,8 @@ export async function sendPasswordResetEmail(
   }
 
   try {
-    const from = process.env.RESEND_FROM || "Watchtower <onboarding@resend.dev>";
+    const from =
+      process.env.RESEND_FROM || "Watchtower <onboarding@resend.dev>";
     const { data, error } = await resend.emails.send({
       from,
       to: [email],
@@ -61,11 +62,16 @@ export async function sendPasswordResetEmail(
     });
 
     if (error) {
-      console.error("[Watchtower Resend] Error response from Resend API:", error);
+      console.error(
+        "[Watchtower Resend] Error response from Resend API:",
+        error,
+      );
       return { sent: false, link: resetLink, error: error.message };
     }
 
-    console.log(`[Watchtower Resend] Reset email sent to ${email} (ID: ${data?.id})`);
+    console.log(
+      `[Watchtower Resend] Reset email sent to ${email} (ID: ${data?.id})`,
+    );
     return { sent: true, link: resetLink };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import axios from "axios";
 
-
 let BASE_URL = "http://localhost:3000";
 
 describe("Website got created", () => {

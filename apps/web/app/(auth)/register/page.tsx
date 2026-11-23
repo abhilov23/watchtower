@@ -8,8 +8,24 @@ import { api } from "../../../lib/api";
 
 const WatchtowerLogo = () => (
   <svg width="34" height="28" viewBox="0 0 24 20" fill="none">
-    <rect x="0" y="2" width="7" height="16" rx="3.5" transform="rotate(-15 0 2)" fill="url(#sgr1)" />
-    <rect x="11" y="2" width="7" height="16" rx="3.5" transform="rotate(-15 11 2)" fill="url(#sgr2)" />
+    <rect
+      x="0"
+      y="2"
+      width="7"
+      height="16"
+      rx="3.5"
+      transform="rotate(-15 0 2)"
+      fill="url(#sgr1)"
+    />
+    <rect
+      x="11"
+      y="2"
+      width="7"
+      height="16"
+      rx="3.5"
+      transform="rotate(-15 11 2)"
+      fill="url(#sgr2)"
+    />
     <defs>
       <linearGradient id="sgr1" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0%" stopColor="#FFFFFF" />
@@ -81,70 +97,109 @@ export default function RegisterPage() {
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "space-between",
-      padding: "28px 24px 32px",
-      backgroundColor: "#07080D",
-      position: "relative",
-      overflow: "hidden",
-    }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        padding: "28px 24px 32px",
+        backgroundColor: "#07080D",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       {/* Background flare */}
-      <div style={{
-        position: "absolute", top: "15%", left: "50%",
-        transform: "translateX(-50%)",
-        width: "700px", height: "400px",
-        background: "radial-gradient(circle at 50% 50%, rgba(91, 99, 211, 0.12) 0%, rgba(124, 135, 247, 0.03) 50%, transparent 70%)",
-        filter: "blur(60px)", pointerEvents: "none", zIndex: 0,
-      }} />
+      <div
+        style={{
+          position: "absolute",
+          top: "15%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "700px",
+          height: "400px",
+          background:
+            "radial-gradient(circle at 50% 50%, rgba(91, 99, 211, 0.12) 0%, rgba(124, 135, 247, 0.03) 50%, transparent 70%)",
+          filter: "blur(60px)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
 
       {/* Back link */}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <Link href="/" style={{
-          display: "inline-flex", alignItems: "center", gap: "8px",
-          color: "#8F9BB7", fontSize: "13px", fontWeight: 500,
-          transition: "color 0.15s ease",
-        }}
+        <Link
+          href="/"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            color: "#8F9BB7",
+            fontSize: "13px",
+            fontWeight: 500,
+            transition: "color 0.15s ease",
+          }}
           onMouseEnter={(e) => (e.currentTarget.style.color = "#FFFFFF")}
           onMouseLeave={(e) => (e.currentTarget.style.color = "#8F9BB7")}
         >
-          <span>←</span><span>Back to Watchtower</span>
+          <span>←</span>
+          <span>Back to Watchtower</span>
         </Link>
       </div>
 
       {/* Form */}
-      <main style={{
-        position: "relative", zIndex: 1,
-        width: "100%", maxWidth: "400px",
-        margin: "0 auto", textAlign: "center",
-      }}>
+      <main
+        style={{
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+          maxWidth: "400px",
+          margin: "0 auto",
+          textAlign: "center",
+        }}
+      >
         <div style={{ marginBottom: "24px", display: "inline-block" }}>
           <WatchtowerLogo />
         </div>
 
-        <h1 style={{
-          fontSize: "28px", fontWeight: 700, color: "#FFFFFF",
-          letterSpacing: "-0.02em", marginBottom: "8px",
-        }}>
+        <h1
+          style={{
+            fontSize: "28px",
+            fontWeight: 700,
+            color: "#FFFFFF",
+            letterSpacing: "-0.02em",
+            marginBottom: "8px",
+          }}
+        >
           Create your account
         </h1>
         <p style={{ fontSize: "14px", color: "#8F9BB7", marginBottom: "28px" }}>
           Already have an account?{" "}
-          <Link href="/login" style={{ color: "#7C87F7", fontWeight: 500 }}>Sign in.</Link>
+          <Link href="/login" style={{ color: "#7C87F7", fontWeight: 500 }}>
+            Sign in.
+          </Link>
         </p>
 
         {error && (
-          <div style={{
-            backgroundColor: "rgba(244, 63, 94, 0.1)",
-            border: "1px solid rgba(244, 63, 94, 0.3)",
-            borderRadius: "8px", padding: "11px 14px",
-            color: "#FB7185", fontSize: "13px",
-            marginBottom: "18px", textAlign: "left",
-            display: "flex", alignItems: "flex-start", gap: "8px",
-          }}>
-            <Icons.AlertTriangle size={15} style={{ marginTop: "1px", flexShrink: 0 }} />
+          <div
+            style={{
+              backgroundColor: "rgba(244, 63, 94, 0.1)",
+              border: "1px solid rgba(244, 63, 94, 0.3)",
+              borderRadius: "8px",
+              padding: "11px 14px",
+              color: "#FB7185",
+              fontSize: "13px",
+              marginBottom: "18px",
+              textAlign: "left",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "8px",
+            }}
+          >
+            <Icons.AlertTriangle
+              size={15}
+              style={{ marginTop: "1px", flexShrink: 0 }}
+            />
             <span>{error}</span>
           </div>
         )}
@@ -152,7 +207,15 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit} style={{ textAlign: "left" }}>
           {/* Username */}
           <div style={{ marginBottom: "16px" }}>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "#8F9BB7", marginBottom: "6px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "#8F9BB7",
+                marginBottom: "6px",
+              }}
+            >
               Username
             </label>
             <input
@@ -162,7 +225,9 @@ export default function RegisterPage() {
               onChange={(e) => setUsername(e.target.value)}
               style={inputStyle}
               onFocus={(e) => (e.target.style.borderColor = "#7C87F7")}
-              onBlur={(e) => (e.target.style.borderColor = "rgba(114, 125, 161, 0.25)")}
+              onBlur={(e) =>
+                (e.target.style.borderColor = "rgba(114, 125, 161, 0.25)")
+              }
               autoComplete="username"
               required
             />
@@ -170,7 +235,15 @@ export default function RegisterPage() {
 
           {/* Email */}
           <div style={{ marginBottom: "16px" }}>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "#8F9BB7", marginBottom: "6px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "#8F9BB7",
+                marginBottom: "6px",
+              }}
+            >
               Email
             </label>
             <input
@@ -180,7 +253,9 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               style={inputStyle}
               onFocus={(e) => (e.target.style.borderColor = "#7C87F7")}
-              onBlur={(e) => (e.target.style.borderColor = "rgba(114, 125, 161, 0.25)")}
+              onBlur={(e) =>
+                (e.target.style.borderColor = "rgba(114, 125, 161, 0.25)")
+              }
               autoComplete="email"
               required
             />
@@ -188,7 +263,15 @@ export default function RegisterPage() {
 
           {/* Password */}
           <div style={{ marginBottom: "16px" }}>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "#8F9BB7", marginBottom: "6px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "#8F9BB7",
+                marginBottom: "6px",
+              }}
+            >
               Password
             </label>
             <div style={{ position: "relative" }}>
@@ -199,7 +282,9 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 style={{ ...inputStyle, paddingRight: "44px" }}
                 onFocus={(e) => (e.target.style.borderColor = "#7C87F7")}
-                onBlur={(e) => (e.target.style.borderColor = "rgba(114, 125, 161, 0.25)")}
+                onBlur={(e) =>
+                  (e.target.style.borderColor = "rgba(114, 125, 161, 0.25)")
+                }
                 autoComplete="new-password"
                 required
               />
@@ -207,26 +292,47 @@ export default function RegisterPage() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 style={{
-                  position: "absolute", right: "12px", top: "50%",
-                  transform: "translateY(-50%)", background: "none",
-                  border: "none", color: "#8F9BB7", cursor: "pointer",
-                  display: "flex", alignItems: "center", padding: 0,
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  color: "#8F9BB7",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: 0,
                 }}
               >
-                {showPassword ? <Icons.EyeOff size={16} /> : <Icons.Eye size={16} />}
+                {showPassword ? (
+                  <Icons.EyeOff size={16} />
+                ) : (
+                  <Icons.Eye size={16} />
+                )}
               </button>
             </div>
             {/* Password strength hint */}
             {password.length > 0 && (
               <div style={{ marginTop: "6px", display: "flex", gap: "4px" }}>
                 {[1, 2, 3].map((i) => (
-                  <div key={i} style={{
-                    flex: 1, height: "3px", borderRadius: "2px",
-                    backgroundColor: password.length >= i * 4
-                      ? (password.length >= 10 ? "#10B981" : password.length >= 7 ? "#F59E0B" : "#EF4444")
-                      : "rgba(114, 125, 161, 0.2)",
-                    transition: "background-color 0.2s ease",
-                  }} />
+                  <div
+                    key={i}
+                    style={{
+                      flex: 1,
+                      height: "3px",
+                      borderRadius: "2px",
+                      backgroundColor:
+                        password.length >= i * 4
+                          ? password.length >= 10
+                            ? "#10B981"
+                            : password.length >= 7
+                              ? "#F59E0B"
+                              : "#EF4444"
+                          : "rgba(114, 125, 161, 0.2)",
+                      transition: "background-color 0.2s ease",
+                    }}
+                  />
                 ))}
               </div>
             )}
@@ -234,7 +340,15 @@ export default function RegisterPage() {
 
           {/* Confirm Password */}
           <div style={{ marginBottom: "24px" }}>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "#8F9BB7", marginBottom: "6px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "#8F9BB7",
+                marginBottom: "6px",
+              }}
+            >
               Confirm Password
             </label>
             <div style={{ position: "relative" }}>
@@ -246,32 +360,40 @@ export default function RegisterPage() {
                 style={{
                   ...inputStyle,
                   paddingRight: "44px",
-                  borderColor: confirmPassword && confirmPassword !== password
-                    ? "rgba(244, 63, 94, 0.5)"
-                    : confirmPassword && confirmPassword === password
-                    ? "rgba(16, 185, 129, 0.5)"
-                    : "rgba(114, 125, 161, 0.25)",
+                  borderColor:
+                    confirmPassword && confirmPassword !== password
+                      ? "rgba(244, 63, 94, 0.5)"
+                      : confirmPassword && confirmPassword === password
+                        ? "rgba(16, 185, 129, 0.5)"
+                        : "rgba(114, 125, 161, 0.25)",
                 }}
                 onFocus={(e) => (e.target.style.borderColor = "#7C87F7")}
                 onBlur={(e) => {
-                  e.target.style.borderColor = confirmPassword && confirmPassword !== password
-                    ? "rgba(244, 63, 94, 0.5)"
-                    : confirmPassword && confirmPassword === password
-                    ? "rgba(16, 185, 129, 0.5)"
-                    : "rgba(114, 125, 161, 0.25)";
+                  e.target.style.borderColor =
+                    confirmPassword && confirmPassword !== password
+                      ? "rgba(244, 63, 94, 0.5)"
+                      : confirmPassword && confirmPassword === password
+                        ? "rgba(16, 185, 129, 0.5)"
+                        : "rgba(114, 125, 161, 0.25)";
                 }}
                 autoComplete="new-password"
                 required
               />
               {confirmPassword && (
-                <div style={{
-                  position: "absolute", right: "12px", top: "50%",
-                  transform: "translateY(-50%)",
-                  color: confirmPassword === password ? "#10B981" : "#EF4444",
-                }}>
-                  {confirmPassword === password
-                    ? <Icons.Check size={16} />
-                    : <Icons.X size={16} />}
+                <div
+                  style={{
+                    position: "absolute",
+                    right: "12px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: confirmPassword === password ? "#10B981" : "#EF4444",
+                  }}
+                >
+                  {confirmPassword === password ? (
+                    <Icons.Check size={16} />
+                  ) : (
+                    <Icons.X size={16} />
+                  )}
                 </div>
               )}
             </div>
@@ -280,31 +402,69 @@ export default function RegisterPage() {
           <button
             type="submit"
             className="cta-button btn"
-            style={{ width: "100%", height: "46px", fontSize: "14px", fontWeight: 600 }}
+            style={{
+              width: "100%",
+              height: "46px",
+              fontSize: "14px",
+              fontWeight: 600,
+            }}
             disabled={loading}
           >
             {loading ? (
-              <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-                <span style={{
-                  width: "14px", height: "14px", border: "2px solid rgba(255,255,255,0.3)",
-                  borderTopColor: "#fff", borderRadius: "50%",
-                  animation: "spin 0.8s linear infinite", display: "inline-block",
-                }} />
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                }}
+              >
+                <span
+                  style={{
+                    width: "14px",
+                    height: "14px",
+                    border: "2px solid rgba(255,255,255,0.3)",
+                    borderTopColor: "#fff",
+                    borderRadius: "50%",
+                    animation: "spin 0.8s linear infinite",
+                    display: "inline-block",
+                  }}
+                />
                 Creating account...
               </span>
-            ) : "Create account"}
+            ) : (
+              "Create account"
+            )}
           </button>
         </form>
       </main>
 
-      <footer style={{
-        position: "relative", zIndex: 1,
-        textAlign: "center", fontSize: "12px", color: "#656A7B", lineHeight: 1.5,
-      }}>
-        <div>By creating an account you agree to our{" "}
-          <Link href="/terms" style={{ color: "#8F9BB7", textDecoration: "underline" }}>Terms of Service</Link>
+      <footer
+        style={{
+          position: "relative",
+          zIndex: 1,
+          textAlign: "center",
+          fontSize: "12px",
+          color: "#656A7B",
+          lineHeight: 1.5,
+        }}
+      >
+        <div>
+          By creating an account you agree to our{" "}
+          <Link
+            href="/terms"
+            style={{ color: "#8F9BB7", textDecoration: "underline" }}
+          >
+            Terms of Service
+          </Link>
           {" and "}
-          <Link href="/privacy" style={{ color: "#8F9BB7", textDecoration: "underline" }}>Privacy Policy</Link>.
+          <Link
+            href="/privacy"
+            style={{ color: "#8F9BB7", textDecoration: "underline" }}
+          >
+            Privacy Policy
+          </Link>
+          .
         </div>
       </footer>
 

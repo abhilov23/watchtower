@@ -12,13 +12,22 @@ interface EditMonitorModalProps {
   onUpdated: (updated: Website) => void;
 }
 
-export function EditMonitorModal({ isOpen, onClose, website, onUpdated }: EditMonitorModalProps) {
+export function EditMonitorModal({
+  isOpen,
+  onClose,
+  website,
+  onUpdated,
+}: EditMonitorModalProps) {
   const [name, setName] = useState(website.name);
   const [url, setUrl] = useState(website.url);
   const [method, setMethod] = useState<HttpMethod>(website.method || "GET");
-  const [intervalSeconds, setIntervalSeconds] = useState(website.intervalSeconds || 60);
+  const [intervalSeconds, setIntervalSeconds] = useState(
+    website.intervalSeconds || 60,
+  );
   const [timeoutMs, setTimeoutMs] = useState(website.timeoutMs || 10000);
-  const [expectedStatusCode, setExpectedStatusCode] = useState(website.expectedStatusCode || 200);
+  const [expectedStatusCode, setExpectedStatusCode] = useState(
+    website.expectedStatusCode || 200,
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,34 +83,54 @@ export function EditMonitorModal({ isOpen, onClose, website, onUpdated }: EditMo
   };
 
   return (
-    <div style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "rgba(7, 8, 13, 0.78)",
-      backdropFilter: "blur(6px)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 1000,
-      padding: "20px",
-    }}>
-      <div className="card" style={{
-        width: "100%",
-        maxWidth: "520px",
-        padding: "28px",
-        backgroundColor: "#0D0F1A",
-        border: "1px solid rgba(114, 125, 161, 0.25)",
-        borderRadius: "12px",
-        boxShadow: "0 24px 60px rgba(0, 0, 0, 0.6)",
-      }}>
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(7, 8, 13, 0.78)",
+        backdropFilter: "blur(6px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+        padding: "20px",
+      }}
+    >
+      <div
+        className="card"
+        style={{
+          width: "100%",
+          maxWidth: "520px",
+          padding: "28px",
+          backgroundColor: "#0D0F1A",
+          border: "1px solid rgba(114, 125, 161, 0.25)",
+          borderRadius: "12px",
+          boxShadow: "0 24px 60px rgba(0, 0, 0, 0.6)",
+        }}
+      >
         {/* Modal Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: "20px",
+          }}
+        >
           <div>
-            <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#FFFFFF" }}>Configure Monitor</h2>
-            <p style={{ color: "var(--text-dim)", fontSize: "13px", marginTop: "4px" }}>
+            <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#FFFFFF" }}>
+              Configure Monitor
+            </h2>
+            <p
+              style={{
+                color: "var(--text-dim)",
+                fontSize: "13px",
+                marginTop: "4px",
+              }}
+            >
               Update check settings, target URL, and response requirements.
             </p>
           </div>
@@ -115,18 +144,20 @@ export function EditMonitorModal({ isOpen, onClose, website, onUpdated }: EditMo
         </div>
 
         {error && (
-          <div style={{
-            backgroundColor: "rgba(244, 63, 94, 0.12)",
-            border: "1px solid rgba(244, 63, 94, 0.3)",
-            borderRadius: "6px",
-            padding: "10px 14px",
-            color: "#FB7185",
-            fontSize: "13px",
-            marginBottom: "16px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}>
+          <div
+            style={{
+              backgroundColor: "rgba(244, 63, 94, 0.12)",
+              border: "1px solid rgba(244, 63, 94, 0.3)",
+              borderRadius: "6px",
+              padding: "10px 14px",
+              color: "#FB7185",
+              fontSize: "13px",
+              marginBottom: "16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
             <Icons.AlertTriangle size={15} />
             <span>{error}</span>
           </div>
@@ -147,7 +178,14 @@ export function EditMonitorModal({ isOpen, onClose, website, onUpdated }: EditMo
           </div>
 
           {/* URL & Method */}
-          <div style={{ display: "grid", gridTemplateColumns: "110px 1fr", gap: "10px", marginBottom: "16px" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "110px 1fr",
+              gap: "10px",
+              marginBottom: "16px",
+            }}
+          >
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">Method</label>
               <select
@@ -178,7 +216,14 @@ export function EditMonitorModal({ isOpen, onClose, website, onUpdated }: EditMo
           </div>
 
           {/* Frequency & Status */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "12px",
+              marginBottom: "16px",
+            }}
+          >
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">Check Frequency</label>
               <select
@@ -225,7 +270,9 @@ export function EditMonitorModal({ isOpen, onClose, website, onUpdated }: EditMo
             </select>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+          <div
+            style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}
+          >
             <button
               type="button"
               className="btn btn-secondary"
@@ -234,11 +281,7 @@ export function EditMonitorModal({ isOpen, onClose, website, onUpdated }: EditMo
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="cta-button btn"
-              disabled={loading}
-            >
+            <button type="submit" className="cta-button btn" disabled={loading}>
               {loading ? "Saving Changes..." : "Save Configuration"}
             </button>
           </div>

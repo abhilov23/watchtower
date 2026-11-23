@@ -43,7 +43,7 @@ export interface Website {
   ticks?: WebsiteTick[];
   createdAt: string;
   updatedAt: string;
-  
+
   // Computed client-side metrics
   currentStatus?: WebsiteStatus;
   lastResponseTimeMs?: number;

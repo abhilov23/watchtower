@@ -12,7 +12,11 @@ interface CreateMonitorModalProps {
   onCreated: (website: Website) => void;
 }
 
-export function CreateMonitorModal({ isOpen, onClose, onCreated }: CreateMonitorModalProps) {
+export function CreateMonitorModal({
+  isOpen,
+  onClose,
+  onCreated,
+}: CreateMonitorModalProps) {
   const [name, setName] = useState("");
   const [url, setUrl] = useState("https://");
   const [method, setMethod] = useState("GET");
@@ -20,7 +24,7 @@ export function CreateMonitorModal({ isOpen, onClose, onCreated }: CreateMonitor
   const [expectedStatusCode, setExpectedStatusCode] = useState(200);
   const [regions, setRegions] = useState<Region[]>(DEFAULT_REGIONS);
   const [selectedRegions, setSelectedRegions] = useState<string[]>(() =>
-    DEFAULT_REGIONS.slice(0, 2).map((r) => r.id)
+    DEFAULT_REGIONS.slice(0, 2).map((r) => r.id),
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,29 +98,55 @@ export function CreateMonitorModal({ isOpen, onClose, onCreated }: CreateMonitor
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "580px", padding: "28px" }}>
+      <div
+        className="modal-content"
+        onClick={(e) => e.stopPropagation()}
+        style={{ maxWidth: "580px", padding: "28px" }}
+      >
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "22px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: "22px",
+          }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{
-              width: "38px",
-              height: "38px",
-              borderRadius: "10px",
-              backgroundColor: "rgba(91, 99, 211, 0.16)",
-              border: "1px solid rgba(124, 135, 247, 0.25)",
-              color: "#7C87F7",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}>
+            <div
+              style={{
+                width: "38px",
+                height: "38px",
+                borderRadius: "10px",
+                backgroundColor: "rgba(91, 99, 211, 0.16)",
+                border: "1px solid rgba(124, 135, 247, 0.25)",
+                color: "#7C87F7",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
               <Icons.Activity size={20} />
             </div>
             <div>
-              <h3 style={{ fontSize: "19px", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.01em" }}>
+              <h3
+                style={{
+                  fontSize: "19px",
+                  fontWeight: 700,
+                  color: "#FFFFFF",
+                  letterSpacing: "-0.01em",
+                }}
+              >
                 Add New Monitor
               </h3>
-              <p style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "2px" }}>
+              <p
+                style={{
+                  fontSize: "13px",
+                  color: "var(--text-muted)",
+                  marginTop: "2px",
+                }}
+              >
                 Configure endpoint checks, interval frequency, and edge regions
               </p>
             </div>
@@ -133,18 +163,20 @@ export function CreateMonitorModal({ isOpen, onClose, onCreated }: CreateMonitor
         </div>
 
         {error && (
-          <div style={{
-            backgroundColor: "rgba(244, 63, 94, 0.12)",
-            border: "1px solid rgba(244, 63, 94, 0.3)",
-            borderRadius: "var(--radius-md)",
-            padding: "10px 14px",
-            color: "#FB7185",
-            fontSize: "13px",
-            marginBottom: "18px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}>
+          <div
+            style={{
+              backgroundColor: "rgba(244, 63, 94, 0.12)",
+              border: "1px solid rgba(244, 63, 94, 0.3)",
+              borderRadius: "var(--radius-md)",
+              padding: "10px 14px",
+              color: "#FB7185",
+              fontSize: "13px",
+              marginBottom: "18px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
             <Icons.AlertTriangle size={16} />
             {error}
           </div>
@@ -165,7 +197,13 @@ export function CreateMonitorModal({ isOpen, onClose, onCreated }: CreateMonitor
           </div>
 
           {/* URL & Method */}
-          <div style={{ display: "grid", gridTemplateColumns: "115px 1fr", gap: "12px" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "115px 1fr",
+              gap: "12px",
+            }}
+          >
             <div className="form-group">
               <label className="form-label">Method</label>
               <select
@@ -195,7 +233,13 @@ export function CreateMonitorModal({ isOpen, onClose, onCreated }: CreateMonitor
           </div>
 
           {/* Check Interval & Expected Status */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "12px",
+            }}
+          >
             <div className="form-group">
               <label className="form-label">Check Frequency</label>
               <select
@@ -224,21 +268,46 @@ export function CreateMonitorModal({ isOpen, onClose, onCreated }: CreateMonitor
 
           {/* Monitoring Probe Regions */}
           <div className="form-group" style={{ marginTop: "4px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-              <label className="form-label" style={{ margin: 0 }}>Probe Edge Locations</label>
-              <span style={{ fontSize: "12px", color: "var(--primary-light)", fontWeight: 500 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "8px",
+              }}
+            >
+              <label className="form-label" style={{ margin: 0 }}>
+                Probe Edge Locations
+              </label>
+              <span
+                style={{
+                  fontSize: "12px",
+                  color: "var(--primary-light)",
+                  fontWeight: 500,
+                }}
+              >
                 {selectedRegions.length} of {regions.length} selected
               </span>
             </div>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
-              gap: "10px",
-            }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: "10px",
+              }}
+            >
               {regions.map((reg) => {
                 const isChecked = selectedRegions.includes(reg.id);
                 // Two-letter country/region code
-                const codeChip = reg.code.startsWith("us") ? "US" : reg.code.startsWith("eu") ? "EU" : reg.code.startsWith("ap-south") ? "IN" : reg.code.startsWith("ap-northeast") ? "JP" : "GL";
+                const codeChip = reg.code.startsWith("us")
+                  ? "US"
+                  : reg.code.startsWith("eu")
+                    ? "EU"
+                    : reg.code.startsWith("ap-south")
+                      ? "IN"
+                      : reg.code.startsWith("ap-northeast")
+                        ? "JP"
+                        : "GL";
                 return (
                   <div
                     key={reg.id}
@@ -246,30 +315,36 @@ export function CreateMonitorModal({ isOpen, onClose, onCreated }: CreateMonitor
                     className={`region-card ${isChecked ? "region-card-selected" : ""}`}
                   >
                     <span className="region-chip">{codeChip}</span>
-                    <span style={{
-                      fontSize: "12.5px",
-                      fontWeight: 500,
-                      color: isChecked ? "#FFFFFF" : "var(--text-muted)",
-                      flex: 1,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}>
+                    <span
+                      style={{
+                        fontSize: "12.5px",
+                        fontWeight: 500,
+                        color: isChecked ? "#FFFFFF" : "var(--text-muted)",
+                        flex: 1,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
                       {reg.name}
                     </span>
-                    <div style={{
-                      width: "16px",
-                      height: "16px",
-                      borderRadius: "4px",
-                      border: `1.5px solid ${isChecked ? "var(--primary-light)" : "rgba(114, 125, 161, 0.3)"}`,
-                      backgroundColor: isChecked ? "var(--primary-color)" : "transparent",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#FFF",
-                      flexShrink: 0,
-                      transition: "all 0.15s ease",
-                    }}>
+                    <div
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        borderRadius: "4px",
+                        border: `1.5px solid ${isChecked ? "var(--primary-light)" : "rgba(114, 125, 161, 0.3)"}`,
+                        backgroundColor: isChecked
+                          ? "var(--primary-color)"
+                          : "transparent",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#FFF",
+                        flexShrink: 0,
+                        transition: "all 0.15s ease",
+                      }}
+                    >
                       {isChecked && <Icons.Check size={11} />}
                     </div>
                   </div>
@@ -279,15 +354,17 @@ export function CreateMonitorModal({ isOpen, onClose, onCreated }: CreateMonitor
           </div>
 
           {/* Action buttons */}
-          <div style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            gap: "10px",
-            marginTop: "24px",
-            paddingTop: "16px",
-            borderTop: "1px solid rgba(114, 125, 161, 0.15)",
-          }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              gap: "10px",
+              marginTop: "24px",
+              paddingTop: "16px",
+              borderTop: "1px solid rgba(114, 125, 161, 0.15)",
+            }}
+          >
             <button
               type="button"
               className="btn btn-secondary"
@@ -300,7 +377,12 @@ export function CreateMonitorModal({ isOpen, onClose, onCreated }: CreateMonitor
               type="submit"
               className="cta-button btn"
               disabled={loading}
-              style={{ height: "38px", padding: "0 22px", borderRadius: "8px", fontWeight: 600 }}
+              style={{
+                height: "38px",
+                padding: "0 22px",
+                borderRadius: "8px",
+                fontWeight: 600,
+              }}
             >
               {loading ? "Creating..." : "Start Monitoring"}
             </button>

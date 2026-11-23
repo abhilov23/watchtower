@@ -70,29 +70,53 @@ export default function SettingsPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-body)", display: "flex", flexDirection: "column" }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "var(--bg-body)",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <DashboardHeader user={user} />
 
       <main className="container" style={{ flex: 1, padding: "32px 20px" }}>
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-          <h1 style={{ fontSize: "22px", fontWeight: 700, color: "#FFFFFF", marginBottom: "6px" }}>Account & Escalation Settings</h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "14px", marginBottom: "28px" }}>
+          <h1
+            style={{
+              fontSize: "22px",
+              fontWeight: 700,
+              color: "#FFFFFF",
+              marginBottom: "6px",
+            }}
+          >
+            Account & Escalation Settings
+          </h1>
+          <p
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "14px",
+              marginBottom: "28px",
+            }}
+          >
             Configure account profile, notification channels, and API keys.
           </p>
 
           {error && (
-            <div style={{
-              backgroundColor: "rgba(244, 63, 94, 0.12)",
-              border: "1px solid rgba(244, 63, 94, 0.3)",
-              borderRadius: "8px",
-              padding: "12px 16px",
-              color: "#FB7185",
-              fontSize: "13px",
-              marginBottom: "20px",
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-            }}>
+            <div
+              style={{
+                backgroundColor: "rgba(244, 63, 94, 0.12)",
+                border: "1px solid rgba(244, 63, 94, 0.3)",
+                borderRadius: "8px",
+                padding: "12px 16px",
+                color: "#FB7185",
+                fontSize: "13px",
+                marginBottom: "20px",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
               <Icons.AlertTriangle size={16} style={{ flexShrink: 0 }} />
               <span>{error}</span>
             </div>
@@ -100,9 +124,28 @@ export default function SettingsPage() {
 
           <form onSubmit={handleSave}>
             {/* Profile Section */}
-            <div className="card" style={{ padding: "24px 28px", marginBottom: "20px" }}>
-              <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#FFFFFF", marginBottom: "16px" }}>User Profile</h3>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
+            <div
+              className="card"
+              style={{ padding: "24px 28px", marginBottom: "20px" }}
+            >
+              <h3
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  color: "#FFFFFF",
+                  marginBottom: "16px",
+                }}
+              >
+                User Profile
+              </h3>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "16px",
+                  marginBottom: "16px",
+                }}
+              >
                 <div className="form-group">
                   <label className="form-label">Username</label>
                   <input
@@ -128,7 +171,9 @@ export default function SettingsPage() {
               </div>
 
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Change Password (leave empty to keep current)</label>
+                <label className="form-label">
+                  Change Password (leave empty to keep current)
+                </label>
                 <div style={{ position: "relative" }}>
                   <input
                     type={showPassword ? "text" : "password"}
@@ -154,46 +199,106 @@ export default function SettingsPage() {
                       alignItems: "center",
                     }}
                   >
-                    {showPassword ? <Icons.EyeOff size={16} /> : <Icons.Eye size={16} />}
+                    {showPassword ? (
+                      <Icons.EyeOff size={16} />
+                    ) : (
+                      <Icons.Eye size={16} />
+                    )}
                   </button>
                 </div>
               </div>
             </div>
 
             {/* Alert Channels */}
-            <div className="card" style={{ padding: "24px 28px", marginBottom: "20px" }}>
-              <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#FFFFFF", marginBottom: "16px" }}>Incident Escalation Channels</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {/* Email */}
-                <div style={{
+            <div
+              className="card"
+              style={{ padding: "24px 28px", marginBottom: "20px" }}
+            >
+              <h3
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  color: "#FFFFFF",
+                  marginBottom: "16px",
+                }}
+              >
+                Incident Escalation Channels
+              </h3>
+              <div
+                style={{
                   display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "12px 16px",
-                  borderRadius: "var(--radius-md)",
-                  backgroundColor: "#0D0F1A",
-                  border: "1px solid rgba(114, 125, 161, 0.14)",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  flexDirection: "column",
+                  gap: "12px",
+                }}
+              >
+                {/* Email */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "12px 16px",
+                    borderRadius: "var(--radius-md)",
+                    backgroundColor: "#0D0F1A",
+                    border: "1px solid rgba(114, 125, 161, 0.14)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                    }}
+                  >
                     <Icons.Mail size={18} color="var(--primary-light)" />
                     <div>
-                      <div style={{ fontSize: "14px", fontWeight: 500, color: "#FFFFFF" }}>Email Alerts</div>
-                      <div style={{ fontSize: "12px", color: "var(--text-dim)" }}>Instant alert reports with error snapshots to {email || "your registered email"}</div>
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          fontWeight: 500,
+                          color: "#FFFFFF",
+                        }}
+                      >
+                        Email Alerts
+                      </div>
+                      <div
+                        style={{ fontSize: "12px", color: "var(--text-dim)" }}
+                      >
+                        Instant alert reports with error snapshots to{" "}
+                        {email || "your registered email"}
+                      </div>
                     </div>
                   </div>
                   <input
                     type="checkbox"
                     checked={emailAlerts}
                     onChange={(e) => setEmailAlerts(e.target.checked)}
-                    style={{ width: "16px", height: "16px", accentColor: "var(--primary-color)", cursor: "pointer" }}
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      accentColor: "var(--primary-color)",
+                      cursor: "pointer",
+                    }}
                   />
                 </div>
               </div>
             </div>
 
             {/* API Token */}
-            <div className="card" style={{ padding: "24px 28px", marginBottom: "24px" }}>
-              <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#FFFFFF", marginBottom: "16px" }}>Developer API Keys</h3>
+            <div
+              className="card"
+              style={{ padding: "24px 28px", marginBottom: "24px" }}
+            >
+              <h3
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  color: "#FFFFFF",
+                  marginBottom: "16px",
+                }}
+              >
+                Developer API Keys
+              </h3>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Personal Access Token</label>
                 <div style={{ display: "flex", gap: "10px" }}>
@@ -215,9 +320,25 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "14px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                gap: "14px",
+              }}
+            >
               {saved && (
-                <span style={{ color: "var(--status-up)", display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 500 }}>
+                <span
+                  style={{
+                    color: "var(--status-up)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                  }}
+                >
                   <Icons.Check size={16} /> Preferences and profile saved!
                 </span>
               )}

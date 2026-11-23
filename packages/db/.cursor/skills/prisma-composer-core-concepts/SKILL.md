@@ -43,21 +43,21 @@ Two principles govern everything and are binding
 Everything you author is a declaration: plain data describing a piece of the
 app, executing nothing when imported. Three node kinds exist:
 
-| Kind | Declared with | Purpose |
-| --- | --- | --- |
-| Service | `compute()` | A running unit of your code; atomic, Composer sees only its boundary |
-| Resource | `rawPostgres()`, `bucket()` | A stateful managed dependency |
-| Resource: public URL | `publicUrl()` | Makes one service reachable from the internet at one hostname; depends on the service's exposed HTTP interface and exposes nothing |
-| Module | `module()` | A grouping boundary; runs no code of its own, depends on and exposes typed interfaces; its builder receives `deps`, `input`, `environment` and `provision` |
-| App root | `appRoot()` | The outermost module, the entry's default export; no `deps` or `expose`, and nothing can provision it; its builder receives `input`, `environment` and `provision` |
+| Kind                 | Declared with               | Purpose                                                                                                                                                            |
+| -------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Service              | `compute()`                 | A running unit of your code; atomic, Composer sees only its boundary                                                                                               |
+| Resource             | `rawPostgres()`, `bucket()` | A stateful managed dependency                                                                                                                                      |
+| Resource: public URL | `publicUrl()`               | Makes one service reachable from the internet at one hostname; depends on the service's exposed HTTP interface and exposes nothing                                 |
+| Module               | `module()`                  | A grouping boundary; runs no code of its own, depends on and exposes typed interfaces; its builder receives `deps`, `input`, `environment` and `provision`         |
+| App root             | `appRoot()`                 | The outermost module, the entry's default export; no `deps` or `expose`, and nothing can provision it; its builder receives `input`, `environment` and `provision` |
 
 Nodes connect through typed **interfaces**: `deps` declares what a node depends on, `expose` declares what it exposes. Wiring happens in a Module's builder via `provision()`, and the app root, built with `appRoot()` and handed to the CLI, is the App:
 
 ```ts
 // module.ts
-import { appRoot } from '@prisma/composer';
+import { appRoot } from "@prisma/composer";
 
-export default appRoot('store', ({ provision }) => {
+export default appRoot("store", ({ provision }) => {
   const catalog = provision(catalogModule);
   provision(storefrontService, { deps: { catalog: catalog.rpc } });
 });
@@ -107,9 +107,9 @@ produces and the platform boots:
 ```ts
 // service.ts
 export default compute({
-  name: 'auth',
+  name: "auth",
   deps: { db: rawPostgres() },
-  build: node({ module: import.meta.url, entry: '../dist/server.mjs' }),
+  build: node({ module: import.meta.url, entry: "../dist/server.mjs" }),
   expose: { rpc: authContract },
 });
 
@@ -118,7 +118,7 @@ const { db } = service.load(); // { url }: you construct your own client
 const handler = serve(service, {
   rpc: { verify: async ({ token }) => ({ ok: token.length > 0 }) },
 });
-Bun.serve({ port: service.port(), hostname: '0.0.0.0', fetch: handler });
+Bun.serve({ port: service.port(), hostname: "0.0.0.0", fetch: handler });
 ```
 
 The consumer declares `deps: { auth: rpc(authContract) }` and gets a typed
@@ -126,9 +126,9 @@ client back from `load()`.
 
 ## Two channels: dependencies and input
 
-| The value is… | Declare | Provide | Read |
-| --- | --- | --- | --- |
-| produced by another node | `deps: { db: rawPostgres() }` | wire at `provision()` | `load()` |
+| The value is…                        | Declare                         | Provide                                                                             | Read      |
+| ------------------------------------ | ------------------------------- | ----------------------------------------------------------------------------------- | --------- |
+| produced by another node             | `deps: { db: rawPostgres() }`   | wire at `provision()`                                                               | `load()`  |
 | anything else (config or credential) | one field of the `input` schema | bind at `provision()`: literal, `envParam()`, `envSecret()`, or a `resolve()` value | `input()` |
 
 The service declares its whole incoming configuration, plain values and
@@ -144,7 +144,7 @@ Rules that bite:
 1. **Secretness is checked by the binding's type and by the deploy.** A `provision()` binding, a service's or a module's, is typed from the schema: a literal or a `SecretBox` where the schema expects `SecretString`, or `envSecret` in a text field, fails to compile, and the deploy refuses it where the schema has no types. An ArkType schema with a `SecretString` field cannot also transform its input: a morph anywhere in it (`'string.trim'`, `.pipe()`, `field(type('string.integer.parse'))`) or `'+': 'delete'` copies the input, the copied secret loses its value, and the deploy refuses it. Transform in the service code instead; a Zod schema keeps the box.
 2. **`envParam` values arrive as raw strings**; bind them to string fields. A field of a narrower type, such as `email()`'s `deliveryMode`, refuses `envParam` at compile time; declare that field in the root's `input` instead, for `email()` from the exported `emailDeliveryModes`. In a service's `input`, the deploy reads the variable from the app configuration on every deploy and writes its value into the input document. As a service param, the deploy writes a pointer row to a platform variable, which the service reads at boot. `envSecret` always lives on the platform: each environment keeps its own copy, and the app secrets only seed a missing name (the deploy fails early, naming the variable, when both lack it).
 3. **Absence is the schema's call.** An env-bound field whose variable is
-   unset or empty resolves to *key omitted*, which is legal only if the
+   unset or empty resolves to _key omitted_, which is legal only if the
    schema allows it (optional field, union arm). The deploy report prints the
    serialized input document (secrets ride as `{"$secret":"VAR"}` pointers)
    and every key that resolved absent.
@@ -285,7 +285,7 @@ bite:
    runs `next dev` instead (see Local development).
 5. **Always build before `deploy`, and before `dev` for a service without a
    dev server.** Neither builds for you. `node({ ..., dev: ['bun', '--watch',
-   'server.ts'] })` gives a node service a dev server: `prisma dev` runs that
+'server.ts'] })` gives a node service a dev server: `prisma dev` runs that
    command (in the authoring module's directory, nothing appended; it must
    listen on `PORT`) instead of the built `entry`.
 
@@ -298,14 +298,17 @@ backend (`prismaState()`):
 
 ```ts
 // prisma.config.ts
-import { defineConfig as composer } from '@prisma/composer/config';
-import { nodeBuild } from '@prisma/composer/node/control';
-import { prismaCloud, prismaState } from '@prisma/composer-prisma-cloud/control';
-import { definePrismaConfig } from 'prisma/config';
+import { defineConfig as composer } from "@prisma/composer/config";
+import { nodeBuild } from "@prisma/composer/node/control";
+import {
+  prismaCloud,
+  prismaState,
+} from "@prisma/composer-prisma-cloud/control";
+import { definePrismaConfig } from "prisma/config";
 
 export default definePrismaConfig({
   composer: composer({
-    entry: './module.ts',
+    entry: "./module.ts",
     extensions: [prismaCloud(), nodeBuild()],
     state: prismaState(),
   }),
@@ -466,8 +469,8 @@ app's services are running. Don't write a script for this.
 without it fails with `DEPLOY.ENVIRONMENT_REQUIRED`:
 
 ```ts
-await destroy({ entry: 'module.ts', environment: 'pr-42', config });
-await destroy({ entry: 'module.ts', environment: 'production', config });
+await destroy({ entry: "module.ts", environment: "pr-42", config });
+await destroy({ entry: "module.ts", environment: "production", config });
 ```
 
 Destroying any environment other than production
@@ -505,7 +508,7 @@ needed.
 2. Failures are bisectable through that file. A failing deploy names its
    path and prints a reproduce command: Node running the bin of the `alchemy`
    Composer depends on, with `deploy .prisma-composer/alchemy.run.ts --yes
-   --stage <stage>` (Alchemy's own flag; on Prisma Cloud its value is the
+--stage <stage>` (Alchemy's own flag; on Prisma Cloud its value is the
    environment's Branch id). Running it directly separates "the framework computed the wrong thing" from "the engine or
    platform rejected the right thing". An engine failure surfaces as
    `DEPLOY.ENGINE_FAILED` carrying the exit code, the engine's own error
@@ -575,7 +578,7 @@ that surprise:
    `service.input()` and `service.port()` work exactly as deployed, so never add a
    `process.env` fallback for plain `next dev`. It also keeps the shell's
    environment variables; Composer's values win. `dev` prints ``<address>: runs
-   `<command>` in <dir>`` before the app comes up and streams the dev
+`<command>` in <dir>`` before the app comes up and streams the dev
    server's output prefixed `[<address>]` (other services' logs are not
    streamed). Source edits are the dev server's own hot reload; `dev` watches
    the entry and every service's authoring module, reconverges on a topology
@@ -587,7 +590,7 @@ that surprise:
    `prisma dev url <address> --json` reports `runs: "dev-server"` or
    `"artifact"`. Errors: a dev server that never listens on its `PORT` fails
    with `DEV.SERVICE_START_FAILED` plus `A dev server must listen on the port
-   in its PORT variable.`; `DEV.DEV_SERVER_UNAVAILABLE` (e.g. `next` not
+in its PORT variable.`; `DEV.DEV_SERVER_UNAVAILABLE` (e.g. `next` not
    installed in `appDir`); `DEV.DEV_SERVER_UNSUPPORTED` (the service's package
    is too old; the message names it).
    `ready` prints only once every service accepts connections on its port, except a service declared `compute({ ..., listens: false })` (one that never listens, like the cron scheduler), which counts as running once its process starts. A service that exits before it listens, or does not listen within 30 seconds, fails `dev` (and stops the app's other services) with a message naming the service, its port, and its log file: on a first start it is in the deploy engine's output, before the error that the deploy engine exited (`DEV.CONVERGE_FAILED` from the `dev` operation); on a warm start it is the `DEV.SERVICE_START_FAILED` message. `PRISMA_COMPOSER_SERVICE_READY_TIMEOUT_MS` raises the 30-second limit (milliseconds); the compute emulator reads it when it starts, so a running emulator keeps its old value until its process ends. An emulator that does not accept connections fails `dev` and `log` with `DEV.EMULATOR_UNREACHABLE` after a few seconds of retries; nothing else is retried.
@@ -598,9 +601,12 @@ that surprise:
    builds, provisions, starts, or stops anything:
 
    ```ts
-   const attached = await log({ entry: 'module.ts', config, tail: 20, signal });
-   if (attached.ok) for await (const { service, line } of attached.value.lines) console.log(service, line);
+   const attached = await log({ entry: "module.ts", config, tail: 20, signal });
+   if (attached.ok)
+     for await (const { service, line } of attached.value.lines)
+       console.log(service, line);
    ```
+
    Don't hard-code a local port; ports differ per directory. `prisma dev url
    <address>` (run in the same directory as `dev`; `--environment`, default `dev`, picks the copy; the address's first segment names the app, and no entry is loaded) prints where a running node
    answers: a service's `http://localhost:<port>`, a database's connection
@@ -631,6 +637,7 @@ that surprise:
    app, including one an earlier `--detach` left running (a failed redeploy
    has already replaced that service's process), and exits non-zero: fix the
    build and run `prisma dev --detach` again.
+
 4. `dev` reads `prisma.config.ts` once, at start, and watches it: after an
    edit it says so and pauses rebuilds until you restart `dev`.
 5. `dev` reads secrets only from the `secrets` adapters. Put them where a `secrets` adapter reads them: the shell by default, or `.env.dev` with `secrets: [dotenv(), environmentVariables()]`. A required secret that is unset or empty stops `dev` with an error naming it; an optional one reaches the service as absent. A changed value takes effect on the next `prisma dev`. A `.env` that only the framework loads (Next.js) does not count: Composer reads secrets before the dev server starts.
@@ -658,9 +665,9 @@ Cloud deployment and local apps without Postgres never load this runtime.
 A test decides what `load()` and `input()` return, never by editing the code
 under test.
 
-| You want to… | Use | From |
-| --- | --- | --- |
-| Test a page / action / handler in isolation | `mockService` | `@prisma/composer/testing` |
+| You want to…                                               | Use                | From                                    |
+| ---------------------------------------------------------- | ------------------ | --------------------------------------- |
+| Test a page / action / handler in isolation                | `mockService`      | `@prisma/composer/testing`              |
 | Run the real boot + request path against a fake dependency | `bootstrapService` | `@prisma/composer-prisma-cloud/testing` |
 
 `mockService` returns a copy of the service whose `load()` yields your
@@ -693,13 +700,13 @@ contract.
 First-party Modules ship inside `@prisma/composer-prisma-cloud` and
 provision exactly like your own:
 
-| Import | What it provisions | Exposes |
-| --- | --- | --- |
-| `cron` from `/cron` | An always-on scheduler (it holds Compute's keep-awake guard) firing your schedule at your runner service; `input` on `cron()` binds the runner's input schema | nothing |
-| `storage` from `/storage` | An S3-backed blob store (own Postgres + minted credentials) | `store` |
-| `streams` from `/streams` | Durable append-only event streams over a `store` | `streams` |
-| `auth` from `/auth` | Signup, login, sessions, and JWT verification (Better Auth in one service, own database). `auth({ signUp: 'closed' })` makes Better Auth refuse self-service sign-up; operator-created accounts go through `admin.createUser({ email, name, password?, emailVerified? })` from a service wired to `admin` (it throws on a duplicate email and sends no mail); a signed-in user deletes their own account with Better Auth's `POST /api/auth/delete-user` through the proxy (password, or a session < 24 h old); operators delete with `admin.removeUser({ userId })`; either way your own rows follow your `auth:User` FK's `onDelete` (`Cascade` deletes them, `Restrict` refuses the deletion). Bind `input: { baseUrl }`, the public app origin: `serviceOrigin('<app>.<service>')`, `envParam(...)` or a literal. | `api`, `session`, `admin` |
-| `email` from `/email` | Transactional email with a stored outbox (own service and database). Bind `input: { deliveryMode, from, deliveryCredential }`; the credential with `envSecret(...)`, required even when `deliveryMode` is `none`. `deliveryMode` is one of `emailDeliveryModes`; bind a literal or a root input field declared from it (`type.enumerated(...emailDeliveryModes)`, `z.enum(emailDeliveryModes)`), not `envParam()`. | `send`, `outbox` |
+| Import                    | What it provisions                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Exposes                   |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `cron` from `/cron`       | An always-on scheduler (it holds Compute's keep-awake guard) firing your schedule at your runner service; `input` on `cron()` binds the runner's input schema                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | nothing                   |
+| `storage` from `/storage` | An S3-backed blob store (own Postgres + minted credentials)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | `store`                   |
+| `streams` from `/streams` | Durable append-only event streams over a `store`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | `streams`                 |
+| `auth` from `/auth`       | Signup, login, sessions, and JWT verification (Better Auth in one service, own database). `auth({ signUp: 'closed' })` makes Better Auth refuse self-service sign-up; operator-created accounts go through `admin.createUser({ email, name, password?, emailVerified? })` from a service wired to `admin` (it throws on a duplicate email and sends no mail); a signed-in user deletes their own account with Better Auth's `POST /api/auth/delete-user` through the proxy (password, or a session < 24 h old); operators delete with `admin.removeUser({ userId })`; either way your own rows follow your `auth:User` FK's `onDelete` (`Cascade` deletes them, `Restrict` refuses the deletion). Bind `input: { baseUrl }`, the public app origin: `serviceOrigin('<app>.<service>')`, `envParam(...)` or a literal. | `api`, `session`, `admin` |
+| `email` from `/email`     | Transactional email with a stored outbox (own service and database). Bind `input: { deliveryMode, from, deliveryCredential }`; the credential with `envSecret(...)`, required even when `deliveryMode` is `none`. `deliveryMode` is one of `emailDeliveryModes`; bind a literal or a root input field declared from it (`type.enumerated(...emailDeliveryModes)`, `z.enum(emailDeliveryModes)`), not `envParam()`.                                                                                                                                                                                                                                                                                                                                                                                                    | `send`, `outbox`          |
 
 `bucket()` (imported alongside `rawPostgres`) is a raw S3-compatible bucket:
 the dependency end receives `{ url, bucket, accessKeyId, secretAccessKey }`,

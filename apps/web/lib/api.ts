@@ -1,4 +1,11 @@
-import { Website, Region, WebsiteTick, User, StatusPage, PublicStatusPageData } from "./types";
+import {
+  Website,
+  Region,
+  WebsiteTick,
+  User,
+  StatusPage,
+  PublicStatusPageData,
+} from "./types";
 import {
   getStoredWebsites,
   saveStoredWebsites,
@@ -9,11 +16,19 @@ import {
   saveStoredStatusPages,
 } from "./store";
 
-async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 4000) {
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  timeoutMs = 4000,
+) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(url, { credentials: "include", ...options, signal: controller.signal });
+    const res = await fetch(url, {
+      credentials: "include",
+      ...options,
+      signal: controller.signal,
+    });
     return res;
   } finally {
     clearTimeout(timeoutId);
@@ -34,7 +49,8 @@ function getRegionFlag(code: string): string {
   if (code.startsWith("us")) return "🇺🇸";
   if (code.startsWith("eu")) return "🇪🇺";
   if (code.startsWith("ap-south")) return "🇮🇳";
-  if (code.startsWith("ap-northeast") || code.startsWith("ap-east")) return "🇯🇵";
+  if (code.startsWith("ap-northeast") || code.startsWith("ap-east"))
+    return "🇯🇵";
   return "🌐";
 }
 
@@ -43,20 +59,34 @@ function generateDefaultTicks(site: any, count = 38): WebsiteTick[] {
   const ticks: WebsiteTick[] = [];
   const now = Date.now();
   const baseMs = 32 + ((site.name?.charCodeAt(0) || 12) % 24);
-  const regionId = site.regions?.[0]?.regionId || site.regions?.[0]?.region?.id || "reg-us-east";
+  const regionId =
+    site.regions?.[0]?.regionId ||
+    site.regions?.[0]?.region?.id ||
+    "reg-us-east";
 
   for (let i = count - 1; i >= 0; i--) {
-    const isTickDown = !isPaused && (i === 14 || i === 29) && (site.name?.length % 2 === 1);
+    const isTickDown =
+      !isPaused && (i === 14 || i === 29) && site.name?.length % 2 === 1;
     const variance = Math.floor(Math.sin(i * 0.9) * 8);
-    const responseTime = isPaused ? 0 : isTickDown ? 0 : Math.max(12, baseMs + variance);
+    const responseTime = isPaused
+      ? 0
+      : isTickDown
+        ? 0
+        : Math.max(12, baseMs + variance);
     ticks.push({
       id: `tick-${site.id}-${i}`,
       websiteId: site.id,
       regionId,
       status: isPaused ? "UNKNOWN" : isTickDown ? "DOWN" : "UP",
-      statusCode: isPaused ? null : isTickDown ? 502 : (site.expectedStatusCode || 200),
+      statusCode: isPaused
+        ? null
+        : isTickDown
+          ? 502
+          : site.expectedStatusCode || 200,
       responseTimeMs: responseTime,
-      createdAt: new Date(now - i * (site.intervalSeconds || 60) * 1000).toISOString(),
+      createdAt: new Date(
+        now - i * (site.intervalSeconds || 60) * 1000,
+      ).toISOString(),
     });
   }
   return ticks;
@@ -81,43 +111,59 @@ export function enrichWebsite(site: any): Website {
 
     // Computed client-side metrics & fallbacks
     currentStatus: site.currentStatus || (isPaused ? "UNKNOWN" : "UP"),
-    lastResponseTimeMs: site.lastResponseTimeMs !== undefined ? site.lastResponseTimeMs : (isPaused ? 0 : defaultBaseMs),
-    uptimePercentage: site.uptimePercentage !== undefined ? site.uptimePercentage : (isPaused ? 99.85 : 99.98),
+    lastResponseTimeMs:
+      site.lastResponseTimeMs !== undefined
+        ? site.lastResponseTimeMs
+        : isPaused
+          ? 0
+          : defaultBaseMs,
+    uptimePercentage:
+      site.uptimePercentage !== undefined
+        ? site.uptimePercentage
+        : isPaused
+          ? 99.85
+          : 99.98,
     lastCheckedAt: site.lastCheckedAt || new Date().toISOString(),
 
     // Multi-region relations
-    regions: Array.isArray(site.regions) && site.regions.length > 0
-      ? site.regions.map((r: any) => {
-          const regionObj = r.region || r;
-          const code = regionObj.code || "us-east-1";
-          return {
-            websiteId: r.websiteId || site.id,
-            regionId: r.regionId || regionObj.id || "reg-us-east",
-            region: {
-              id: regionObj.id || r.regionId || "reg-us-east",
-              name: regionObj.name || "Edge Region",
-              code,
-              enabled: regionObj.enabled !== false,
-              flag: regionObj.flag || getRegionFlag(code),
-            },
-          };
-        })
-      : DEFAULT_REGIONS.slice(0, 2).map((r) => ({
-          websiteId: site.id,
-          regionId: r.id,
-          region: r,
-        })),
+    regions:
+      Array.isArray(site.regions) && site.regions.length > 0
+        ? site.regions.map((r: any) => {
+            const regionObj = r.region || r;
+            const code = regionObj.code || "us-east-1";
+            return {
+              websiteId: r.websiteId || site.id,
+              regionId: r.regionId || regionObj.id || "reg-us-east",
+              region: {
+                id: regionObj.id || r.regionId || "reg-us-east",
+                name: regionObj.name || "Edge Region",
+                code,
+                enabled: regionObj.enabled !== false,
+                flag: regionObj.flag || getRegionFlag(code),
+              },
+            };
+          })
+        : DEFAULT_REGIONS.slice(0, 2).map((r) => ({
+            websiteId: site.id,
+            regionId: r.id,
+            region: r,
+          })),
 
     // Real or synthetic tick sequence for timeline & latency chart
-    ticks: Array.isArray(site.ticks) && site.ticks.length > 0
-      ? site.ticks
-      : generateDefaultTicks(site),
+    ticks:
+      Array.isArray(site.ticks) && site.ticks.length > 0
+        ? site.ticks
+        : generateDefaultTicks(site),
   };
 }
 
 export const api = {
   // Auth APIs
-  async register(username: string, email: string, password: string): Promise<{ success: boolean; message?: string; user?: User }> {
+  async register(
+    username: string,
+    email: string,
+    password: string,
+  ): Promise<{ success: boolean; message?: string; user?: User }> {
     try {
       const res = await fetchWithTimeout("/api/auth/register", {
         method: "POST",
@@ -127,7 +173,10 @@ export const api = {
       const data = await res.json().catch(() => ({}));
 
       // Backend returns 201 with { message: "user registered successfully" }
-      if (res.status === 201 || data?.message === "user registered successfully") {
+      if (
+        res.status === 201 ||
+        data?.message === "user registered successfully"
+      ) {
         const loginRes = await api.login(username, password);
         if (loginRes.success && loginRes.user) {
           return { success: true, user: loginRes.user };
@@ -142,16 +191,25 @@ export const api = {
       }
 
       if (!res.ok) {
-        return { success: false, message: data?.message || "Registration failed" };
+        return {
+          success: false,
+          message: data?.message || "Registration failed",
+        };
       }
     } catch {
-      return { success: false, message: "Unable to connect to backend server." };
+      return {
+        success: false,
+        message: "Unable to connect to backend server.",
+      };
     }
 
     return { success: false, message: "Registration failed." };
   },
 
-  async login(identifier: string, password: string): Promise<{ success: boolean; message?: string; user?: User }> {
+  async login(
+    identifier: string,
+    password: string,
+  ): Promise<{ success: boolean; message?: string; user?: User }> {
     try {
       const res = await fetchWithTimeout("/api/auth/login", {
         method: "POST",
@@ -169,17 +227,25 @@ export const api = {
         const user: User = {
           id: "u-" + identifier,
           username: identifier,
-          email: identifier.includes("@") ? identifier : `${identifier}@watchtower.dev`,
+          email: identifier.includes("@")
+            ? identifier
+            : `${identifier}@watchtower.dev`,
         };
         setStoredUser(user);
         return { success: true, user };
       }
 
       if (res.status === 401 || !res.ok) {
-        return { success: false, message: data?.message || "Invalid credentials" };
+        return {
+          success: false,
+          message: data?.message || "Invalid credentials",
+        };
       }
     } catch {
-      return { success: false, message: "Unable to connect to backend server." };
+      return {
+        success: false,
+        message: "Unable to connect to backend server.",
+      };
     }
 
     return { success: false, message: "Invalid credentials" };
@@ -237,7 +303,11 @@ export const api = {
       if (res.ok && data?.success && data?.data) {
         const updated: User = data.data;
         setStoredUser(updated);
-        return { success: true, data: updated, message: data.message || "Profile updated successfully" };
+        return {
+          success: true,
+          data: updated,
+          message: data.message || "Profile updated successfully",
+        };
       }
 
       if (!res.ok && data?.message) {
@@ -253,13 +323,19 @@ export const api = {
           ...(input.email ? { email: input.email } : {}),
         };
         setStoredUser(updated);
-        return { success: true, data: updated, message: "Profile updated (offline mode)" };
+        return {
+          success: true,
+          data: updated,
+          message: "Profile updated (offline mode)",
+        };
       }
     }
     return { success: false, message: "Failed to update profile" };
   },
 
-  async requestPasswordReset(email: string): Promise<{ success: boolean; message: string; debugLink?: string }> {
+  async requestPasswordReset(
+    email: string,
+  ): Promise<{ success: boolean; message: string; debugLink?: string }> {
     try {
       const res = await fetchWithTimeout("/api/auth/forgot-password", {
         method: "POST",
@@ -270,7 +346,9 @@ export const api = {
       if (res.ok && data?.success) {
         return {
           success: true,
-          message: data.message || "If an account with that email exists, a password reset link has been sent.",
+          message:
+            data.message ||
+            "If an account with that email exists, a password reset link has been sent.",
           debugLink: data.debugLink,
         };
       }
@@ -283,11 +361,15 @@ export const api = {
 
     return {
       success: true,
-      message: "If an account with that email exists, a password reset link has been sent.",
+      message:
+        "If an account with that email exists, a password reset link has been sent.",
     };
   },
 
-  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<{ success: boolean; message: string }> {
     try {
       const res = await fetchWithTimeout("/api/auth/reset-password", {
         method: "POST",
@@ -298,7 +380,8 @@ export const api = {
       if (res.ok && data?.success) {
         return {
           success: true,
-          message: data.message || "Password reset successfully. You can now log in.",
+          message:
+            data.message || "Password reset successfully. You can now log in.",
         };
       }
       if (!res.ok && data?.message) {
@@ -310,7 +393,8 @@ export const api = {
 
     return {
       success: true,
-      message: "Password reset successfully (offline mode). You can now log in.",
+      message:
+        "Password reset successfully (offline mode). You can now log in.",
     };
   },
 
@@ -418,7 +502,10 @@ export const api = {
     if (res.ok && data?.success && data?.data) {
       const enriched = enrichWebsite(data.data);
       const current = getStoredWebsites();
-      saveStoredWebsites([enriched, ...current.filter((w) => w.id !== enriched.id)]);
+      saveStoredWebsites([
+        enriched,
+        ...current.filter((w) => w.id !== enriched.id),
+      ]);
       return enriched;
     }
 
@@ -426,17 +513,22 @@ export const api = {
       throw new Error(data.message);
     }
 
-    throw new Error("Failed to create monitor. Please check your backend connection.");
+    throw new Error(
+      "Failed to create monitor. Please check your backend connection.",
+    );
   },
 
-  async updateWebsite(id: string, input: {
-    name?: string;
-    url?: string;
-    method?: string;
-    intervalSeconds?: number;
-    timeoutMs?: number;
-    expectedStatusCode?: number;
-  }): Promise<Website | null> {
+  async updateWebsite(
+    id: string,
+    input: {
+      name?: string;
+      url?: string;
+      method?: string;
+      intervalSeconds?: number;
+      timeoutMs?: number;
+      expectedStatusCode?: number;
+    },
+  ): Promise<Website | null> {
     const res = await fetchWithTimeout(`/api/websites/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -455,9 +547,14 @@ export const api = {
     return null;
   },
 
-  async togglePause(id: string, currentStatus: "ACTIVE" | "PAUSED"): Promise<Website | null> {
+  async togglePause(
+    id: string,
+    currentStatus: "ACTIVE" | "PAUSED",
+  ): Promise<Website | null> {
     const isPaused = currentStatus === "PAUSED";
-    const endpoint = isPaused ? `/api/websites/${id}/resume` : `/api/websites/${id}/pause`;
+    const endpoint = isPaused
+      ? `/api/websites/${id}/resume`
+      : `/api/websites/${id}/pause`;
     const res = await fetchWithTimeout(endpoint, { method: "POST" });
     const data = await res.json().catch(() => null);
     if (res.ok && data?.success && data?.data) {
@@ -470,7 +567,9 @@ export const api = {
   },
 
   async deleteWebsite(id: string): Promise<boolean> {
-    const res = await fetchWithTimeout(`/api/websites/${id}`, { method: "DELETE" });
+    const res = await fetchWithTimeout(`/api/websites/${id}`, {
+      method: "DELETE",
+    });
     if (res.ok) {
       const current = getStoredWebsites();
       saveStoredWebsites(current.filter((w) => w.id !== id));
@@ -491,7 +590,10 @@ export const api = {
     isPublished?: boolean;
   }): Promise<StatusPage> {
     const pages = getStoredStatusPages();
-    const cleanSlug = input.slug.toLowerCase().replace(/[^a-z0-9-]+/g, "").replace(/^-+|-+$/g, "");
+    const cleanSlug = input.slug
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, "")
+      .replace(/^-+|-+$/g, "");
     if (pages.some((p) => p.slug === cleanSlug)) {
       throw new Error(`The slug '${cleanSlug}' is already taken.`);
     }
@@ -510,12 +612,15 @@ export const api = {
     return created;
   },
 
-  async updateStatusPage(id: string, input: {
-    name?: string;
-    slug?: string;
-    description?: string;
-    isPublished?: boolean;
-  }): Promise<StatusPage | null> {
+  async updateStatusPage(
+    id: string,
+    input: {
+      name?: string;
+      slug?: string;
+      description?: string;
+      isPublished?: boolean;
+    },
+  ): Promise<StatusPage | null> {
     const pages = getStoredStatusPages();
     const updatedPages = pages.map((p) => {
       if (p.id === id) {
@@ -523,8 +628,12 @@ export const api = {
           ...p,
           ...(input.name ? { name: input.name.trim() } : {}),
           ...(input.slug ? { slug: input.slug.trim() } : {}),
-          ...(input.description !== undefined ? { description: input.description } : {}),
-          ...(input.isPublished !== undefined ? { isPublished: input.isPublished } : {}),
+          ...(input.description !== undefined
+            ? { description: input.description }
+            : {}),
+          ...(input.isPublished !== undefined
+            ? { isPublished: input.isPublished }
+            : {}),
           updatedAt: new Date().toISOString(),
         };
       }
@@ -541,7 +650,9 @@ export const api = {
     return true;
   },
 
-  async getPublicStatusPage(slug: string): Promise<PublicStatusPageData | null> {
+  async getPublicStatusPage(
+    slug: string,
+  ): Promise<PublicStatusPageData | null> {
     const pages = getStoredStatusPages();
     const found = pages.find((p) => p.slug === slug);
     const websites = await api.getWebsites();

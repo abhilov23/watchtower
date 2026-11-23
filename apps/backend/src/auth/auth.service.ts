@@ -169,7 +169,7 @@ export async function resetPassword(
 
 export async function updateProfile(
   userId: string,
-  input: { username?: string; email?: string; password?: string }
+  input: { username?: string; email?: string; password?: string },
 ) {
   const user = await prismaClient.user.findUnique({
     where: { id: userId },
@@ -197,7 +197,8 @@ export async function updateProfile(
     }
   }
 
-  const dataToUpdate: { username?: string; email?: string; password?: string } = {};
+  const dataToUpdate: { username?: string; email?: string; password?: string } =
+    {};
   if (input.username?.trim()) dataToUpdate.username = input.username.trim();
   if (input.email?.trim()) dataToUpdate.email = input.email.trim();
   if (input.password && input.password.trim().length >= 6) {

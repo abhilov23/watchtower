@@ -1,28 +1,70 @@
 import { Website, Region, WebsiteTick, User, StatusPage } from "./types";
 
 export const DEFAULT_REGIONS: Region[] = [
-  { id: "reg-us-east", name: "US East (N. Virginia)", code: "us-east-1", enabled: true, flag: "🇺🇸" },
-  { id: "reg-eu-central", name: "EU Central (Frankfurt)", code: "eu-central-1", enabled: true, flag: "🇩🇪" },
-  { id: "reg-ap-south", name: "Asia South (Mumbai)", code: "ap-south-1", enabled: true, flag: "🇮🇳" },
-  { id: "reg-ap-northeast", name: "Asia Pacific (Tokyo)", code: "ap-northeast-1", enabled: true, flag: "🇯🇵" },
-  { id: "reg-us-west", name: "US West (Oregon)", code: "us-west-2", enabled: true, flag: "🇺🇸" },
-  { id: "reg-eu-west", name: "EU West (London)", code: "eu-west-1", enabled: true, flag: "🇬🇧" },
+  {
+    id: "reg-us-east",
+    name: "US East (N. Virginia)",
+    code: "us-east-1",
+    enabled: true,
+    flag: "🇺🇸",
+  },
+  {
+    id: "reg-eu-central",
+    name: "EU Central (Frankfurt)",
+    code: "eu-central-1",
+    enabled: true,
+    flag: "🇩🇪",
+  },
+  {
+    id: "reg-ap-south",
+    name: "Asia South (Mumbai)",
+    code: "ap-south-1",
+    enabled: true,
+    flag: "🇮🇳",
+  },
+  {
+    id: "reg-ap-northeast",
+    name: "Asia Pacific (Tokyo)",
+    code: "ap-northeast-1",
+    enabled: true,
+    flag: "🇯🇵",
+  },
+  {
+    id: "reg-us-west",
+    name: "US West (Oregon)",
+    code: "us-west-2",
+    enabled: true,
+    flag: "🇺🇸",
+  },
+  {
+    id: "reg-eu-west",
+    name: "EU West (London)",
+    code: "eu-west-1",
+    enabled: true,
+    flag: "🇬🇧",
+  },
 ];
 
 function getRegion(index: number): Region {
-  return DEFAULT_REGIONS[index] || DEFAULT_REGIONS[0] as Region;
+  return DEFAULT_REGIONS[index] || (DEFAULT_REGIONS[0] as Region);
 }
 
-function generateTicks(count: number, baseMs: number, failRatio: number = 0.02): WebsiteTick[] {
+function generateTicks(
+  count: number,
+  baseMs: number,
+  failRatio: number = 0.02,
+): WebsiteTick[] {
   const ticks: WebsiteTick[] = [];
   const now = Date.now();
-  
+
   for (let i = count - 1; i >= 0; i--) {
     const timestamp = new Date(now - i * 60 * 1000).toISOString();
     const isDown = Math.random() < failRatio;
-    const responseTimeMs = isDown ? 0 : Math.floor(baseMs + (Math.random() * 25 - 12));
+    const responseTimeMs = isDown
+      ? 0
+      : Math.floor(baseMs + (Math.random() * 25 - 12));
     const reg = getRegion(Math.floor(Math.random() * DEFAULT_REGIONS.length));
-    
+
     ticks.push({
       id: `tick-${i}-${Math.random().toString(36).substring(7)}`,
       websiteId: "mock",
@@ -117,7 +159,11 @@ export const INITIAL_WEBSITES: Website[] = [
     createdAt: new Date(Date.now() - 45 * 24 * 3600 * 1000).toISOString(),
     updatedAt: new Date().toISOString(),
     regions: [
-      { websiteId: "web-4", regionId: "reg-ap-northeast", region: getRegion(3) },
+      {
+        websiteId: "web-4",
+        regionId: "reg-ap-northeast",
+        region: getRegion(3),
+      },
       { websiteId: "web-4", regionId: "reg-eu-central", region: getRegion(1) },
     ],
     ticks: generateTicks(40, 18, 0.0),
@@ -174,7 +220,8 @@ export const INITIAL_STATUS_PAGES: StatusPage[] = [
     id: "sp-default",
     name: "Watchtower Live Status",
     slug: "watchtower-live",
-    description: "Official real-time operational status for all Watchtower platform endpoints and edge clusters.",
+    description:
+      "Official real-time operational status for all Watchtower platform endpoints and edge clusters.",
     isPublished: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -186,7 +233,10 @@ export function getStoredStatusPages(): StatusPage[] {
   try {
     const raw = localStorage.getItem(STATUS_PAGES_KEY);
     if (!raw) {
-      localStorage.setItem(STATUS_PAGES_KEY, JSON.stringify(INITIAL_STATUS_PAGES));
+      localStorage.setItem(
+        STATUS_PAGES_KEY,
+        JSON.stringify(INITIAL_STATUS_PAGES),
+      );
       return INITIAL_STATUS_PAGES;
     }
     return JSON.parse(raw);

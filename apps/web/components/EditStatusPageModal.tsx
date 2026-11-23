@@ -73,54 +73,80 @@ export function EditStatusPageModal({
   };
 
   return (
-    <div style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "rgba(7, 8, 13, 0.78)",
-      backdropFilter: "blur(6px)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 1000,
-      padding: "20px",
-    }}>
-      <div className="card" style={{
-        width: "100%",
-        maxWidth: "500px",
-        padding: "28px",
-        backgroundColor: "#0D0F1A",
-        border: "1px solid rgba(114, 125, 161, 0.25)",
-        borderRadius: "12px",
-        boxShadow: "0 24px 60px rgba(0, 0, 0, 0.6)",
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(7, 8, 13, 0.78)",
+        backdropFilter: "blur(6px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+        padding: "20px",
+      }}
+    >
+      <div
+        className="card"
+        style={{
+          width: "100%",
+          maxWidth: "500px",
+          padding: "28px",
+          backgroundColor: "#0D0F1A",
+          border: "1px solid rgba(114, 125, 161, 0.25)",
+          borderRadius: "12px",
+          boxShadow: "0 24px 60px rgba(0, 0, 0, 0.6)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: "20px",
+          }}
+        >
           <div>
-            <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#FFFFFF" }}>Configure Status Page</h2>
-            <p style={{ color: "var(--text-dim)", fontSize: "13px", marginTop: "4px" }}>
+            <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#FFFFFF" }}>
+              Configure Status Page
+            </h2>
+            <p
+              style={{
+                color: "var(--text-dim)",
+                fontSize: "13px",
+                marginTop: "4px",
+              }}
+            >
               Update branding, URL slug, and visibility settings.
             </p>
           </div>
-          <button onClick={onClose} className="btn-ghost" style={{ padding: "4px", color: "var(--text-dim)" }}>
+          <button
+            onClick={onClose}
+            className="btn-ghost"
+            style={{ padding: "4px", color: "var(--text-dim)" }}
+          >
             <Icons.X size={18} />
           </button>
         </div>
 
         {error && (
-          <div style={{
-            backgroundColor: "rgba(244, 63, 94, 0.12)",
-            border: "1px solid rgba(244, 63, 94, 0.3)",
-            borderRadius: "6px",
-            padding: "10px 14px",
-            color: "#FB7185",
-            fontSize: "13px",
-            marginBottom: "16px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}>
+          <div
+            style={{
+              backgroundColor: "rgba(244, 63, 94, 0.12)",
+              border: "1px solid rgba(244, 63, 94, 0.3)",
+              borderRadius: "6px",
+              padding: "10px 14px",
+              color: "#FB7185",
+              fontSize: "13px",
+              marginBottom: "16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
             <Icons.AlertTriangle size={15} />
             <span>{error}</span>
           </div>
@@ -142,28 +168,36 @@ export function EditStatusPageModal({
           <div className="form-group">
             <label className="form-label">URL Slug</label>
             <div style={{ display: "flex", alignItems: "center" }}>
-              <span style={{
-                backgroundColor: "rgba(17, 20, 34, 0.9)",
-                border: "1px solid rgba(114, 125, 161, 0.25)",
-                borderRight: "none",
-                borderRadius: "var(--radius-sm) 0 0 var(--radius-sm)",
-                padding: "0 10px",
-                height: "38px",
-                display: "flex",
-                alignItems: "center",
-                color: "var(--text-dim)",
-                fontSize: "13px",
-                fontFamily: "var(--font-mono)",
-              }}>
+              <span
+                style={{
+                  backgroundColor: "rgba(17, 20, 34, 0.9)",
+                  border: "1px solid rgba(114, 125, 161, 0.25)",
+                  borderRight: "none",
+                  borderRadius: "var(--radius-sm) 0 0 var(--radius-sm)",
+                  padding: "0 10px",
+                  height: "38px",
+                  display: "flex",
+                  alignItems: "center",
+                  color: "var(--text-dim)",
+                  fontSize: "13px",
+                  fontFamily: "var(--font-mono)",
+                }}
+              >
                 /status/
               </span>
               <input
                 type="text"
                 className="form-input font-mono"
                 value={slug}
-                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, ""))}
+                onChange={(e) =>
+                  setSlug(
+                    e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, ""),
+                  )
+                }
                 placeholder="acme-cloud"
-                style={{ borderRadius: "0 var(--radius-sm) var(--radius-sm) 0" }}
+                style={{
+                  borderRadius: "0 var(--radius-sm) var(--radius-sm) 0",
+                }}
                 required
               />
             </div>
@@ -181,29 +215,44 @@ export function EditStatusPageModal({
             />
           </div>
 
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "12px 14px",
-            backgroundColor: "#111424",
-            borderRadius: "8px",
-            marginBottom: "24px",
-            border: "1px solid rgba(114, 125, 161, 0.15)",
-          }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "12px 14px",
+              backgroundColor: "#111424",
+              borderRadius: "8px",
+              marginBottom: "24px",
+              border: "1px solid rgba(114, 125, 161, 0.15)",
+            }}
+          >
             <div>
-              <div style={{ fontSize: "13px", fontWeight: 600, color: "#FFFFFF" }}>Public Visibility</div>
-              <div style={{ fontSize: "12px", color: "var(--text-dim)" }}>Allow anyone to view this status page without logging in</div>
+              <div
+                style={{ fontSize: "13px", fontWeight: 600, color: "#FFFFFF" }}
+              >
+                Public Visibility
+              </div>
+              <div style={{ fontSize: "12px", color: "var(--text-dim)" }}>
+                Allow anyone to view this status page without logging in
+              </div>
             </div>
             <input
               type="checkbox"
               checked={isPublished}
               onChange={(e) => setIsPublished(e.target.checked)}
-              style={{ width: "16px", height: "16px", accentColor: "var(--primary-color)", cursor: "pointer" }}
+              style={{
+                width: "16px",
+                height: "16px",
+                accentColor: "var(--primary-color)",
+                cursor: "pointer",
+              }}
             />
           </div>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+          <div
+            style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}
+          >
             <button
               type="button"
               className="btn btn-secondary"
@@ -212,11 +261,7 @@ export function EditStatusPageModal({
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="cta-button btn"
-              disabled={loading}
-            >
+            <button type="submit" className="cta-button btn" disabled={loading}>
               {loading ? "Saving..." : "Save Changes"}
             </button>
           </div>

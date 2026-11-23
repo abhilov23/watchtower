@@ -38,7 +38,9 @@ const handleJsonErrors: ErrorRequestHandler = (error, _req, res, next) => {
     "type" in error &&
     error.type === "entity.parse.failed"
   ) {
-    return res.status(400).json({ success: false, message: "Invalid JSON request body." });
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid JSON request body." });
   }
 
   return next(error);
