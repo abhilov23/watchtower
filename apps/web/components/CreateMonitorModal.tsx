@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Icons } from "./Icons";
 import { api } from "../lib/api";
 import { DEFAULT_REGIONS } from "../lib/store";
-import { Website } from "../lib/types";
+import { Website, Region } from "../lib/types";
 
 interface CreateMonitorModalProps {
   isOpen: boolean;
@@ -18,12 +18,33 @@ export function CreateMonitorModal({ isOpen, onClose, onCreated }: CreateMonitor
   const [method, setMethod] = useState("GET");
   const [intervalSeconds, setIntervalSeconds] = useState(60);
   const [expectedStatusCode, setExpectedStatusCode] = useState(200);
-  const [selectedRegions, setSelectedRegions] = useState<string[]>([
-    "reg-us-east",
-    "reg-eu-central",
-  ]);
+  const [regions, setRegions] = useState<Region[]>(DEFAULT_REGIONS);
+  const [selectedRegions, setSelectedRegions] = useState<string[]>(() =>
+    DEFAULT_REGIONS.slice(0, 2).map((r) => r.id)
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function fetchRegions() {
+      try {
+        const fetched = await api.getRegions();
+        if (mounted && fetched && fetched.length > 0) {
+          setRegions(fetched);
+          setSelectedRegions(fetched.slice(0, 2).map((r) => r.id));
+        }
+      } catch {
+        // use default regions
+      }
+    }
+    if (isOpen) {
+      fetchRegions();
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -206,7 +227,7 @@ export function CreateMonitorModal({ isOpen, onClose, onCreated }: CreateMonitor
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
               <label className="form-label" style={{ margin: 0 }}>Probe Edge Locations</label>
               <span style={{ fontSize: "12px", color: "var(--primary-light)", fontWeight: 500 }}>
-                {selectedRegions.length} of {DEFAULT_REGIONS.length} selected
+                {selectedRegions.length} of {regions.length} selected
               </span>
             </div>
             <div style={{
@@ -214,7 +235,7 @@ export function CreateMonitorModal({ isOpen, onClose, onCreated }: CreateMonitor
               gridTemplateColumns: "repeat(2, 1fr)",
               gap: "10px",
             }}>
-              {DEFAULT_REGIONS.map((reg) => {
+              {regions.map((reg) => {
                 const isChecked = selectedRegions.includes(reg.id);
                 // Two-letter country/region code
                 const codeChip = reg.code.startsWith("us") ? "US" : reg.code.startsWith("eu") ? "EU" : reg.code.startsWith("ap-south") ? "IN" : reg.code.startsWith("ap-northeast") ? "JP" : "GL";

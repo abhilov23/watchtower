@@ -1,13 +1,26 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { DashboardHeader } from "../../../components/DashboardHeader";
 import { Icons } from "../../../components/Icons";
+import { api } from "../../../lib/api";
+import { User } from "../../../lib/types";
 
 export function StatusPagesView() {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    async function loadUser() {
+      const u = await api.getMe();
+      setUser(u);
+    }
+    loadUser();
+  }, []);
+
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-body)", display: "flex", flexDirection: "column" }}>
-      <DashboardHeader user={null} />
+      <DashboardHeader user={user} />
 
       <main className="container" style={{ flex: 1, padding: "32px 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" }}>

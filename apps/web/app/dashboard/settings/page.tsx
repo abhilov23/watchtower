@@ -1,14 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardHeader } from "../../../components/DashboardHeader";
 import { Icons } from "../../../components/Icons";
+import { api } from "../../../lib/api";
+import { User } from "../../../lib/types";
 
 export default function SettingsPage() {
+  const [user, setUser] = useState<User | null>(null);
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [slackAlerts, setSlackAlerts] = useState(true);
   const [smsAlerts, setSmsAlerts] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    async function loadUser() {
+      const u = await api.getMe();
+      setUser(u);
+    }
+    loadUser();
+  }, []);
 
   const handleSave = () => {
     setSaved(true);
@@ -17,7 +28,7 @@ export default function SettingsPage() {
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-body)", display: "flex", flexDirection: "column" }}>
-      <DashboardHeader user={null} />
+      <DashboardHeader user={user} />
 
       <main className="container" style={{ flex: 1, padding: "32px 20px" }}>
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
@@ -32,11 +43,11 @@ export default function SettingsPage() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
               <div className="form-group">
                 <label className="form-label">Username</label>
-                <input type="text" className="form-input" defaultValue="alex_engineer" />
+                <input type="text" className="form-input" defaultValue={user?.username || "alex_engineer"} key={user?.username} />
               </div>
               <div className="form-group">
                 <label className="form-label">Email</label>
-                <input type="email" className="form-input" defaultValue="alex@watchtower.dev" />
+                <input type="email" className="form-input" defaultValue={user?.email || "alex@watchtower.dev"} key={user?.email} />
               </div>
             </div>
           </div>

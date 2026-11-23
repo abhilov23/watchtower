@@ -1,7 +1,7 @@
-import { Website, Region, User } from "./types";
+import { Website, Region, WebsiteTick, User } from "./types";
 import { getStoredWebsites, saveStoredWebsites, DEFAULT_REGIONS, getStoredUser, setStoredUser } from "./store";
 
-async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 2500) {
+async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 4000) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -10,6 +10,101 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+const REGION_FLAG_MAP: Record<string, string> = {
+  "us-east-1": "🇺🇸",
+  "us-west-2": "🇺🇸",
+  "eu-central-1": "🇩🇪",
+  "eu-west-1": "🇬🇧",
+  "ap-south-1": "🇮🇳",
+  "ap-northeast-1": "🇯🇵",
+};
+
+function getRegionFlag(code: string): string {
+  if (REGION_FLAG_MAP[code]) return REGION_FLAG_MAP[code];
+  if (code.startsWith("us")) return "🇺🇸";
+  if (code.startsWith("eu")) return "🇪🇺";
+  if (code.startsWith("ap-south")) return "🇮🇳";
+  if (code.startsWith("ap-northeast") || code.startsWith("ap-east")) return "🇯🇵";
+  return "🌐";
+}
+
+function generateDefaultTicks(site: any, count = 38): WebsiteTick[] {
+  const isPaused = site.monitorStatus === "PAUSED";
+  const ticks: WebsiteTick[] = [];
+  const now = Date.now();
+  const baseMs = 32 + ((site.name?.charCodeAt(0) || 12) % 24);
+  const regionId = site.regions?.[0]?.regionId || site.regions?.[0]?.region?.id || "reg-us-east";
+
+  for (let i = count - 1; i >= 0; i--) {
+    const isTickDown = !isPaused && (i === 14 || i === 29) && (site.name?.length % 2 === 1);
+    const variance = Math.floor(Math.sin(i * 0.9) * 8);
+    const responseTime = isPaused ? 0 : isTickDown ? 0 : Math.max(12, baseMs + variance);
+    ticks.push({
+      id: `tick-${site.id}-${i}`,
+      websiteId: site.id,
+      regionId,
+      status: isPaused ? "UNKNOWN" : isTickDown ? "DOWN" : "UP",
+      statusCode: isPaused ? null : isTickDown ? 502 : (site.expectedStatusCode || 200),
+      responseTimeMs: responseTime,
+      createdAt: new Date(now - i * (site.intervalSeconds || 60) * 1000).toISOString(),
+    });
+  }
+  return ticks;
+}
+
+export function enrichWebsite(site: any): Website {
+  const isPaused = site.monitorStatus === "PAUSED";
+  const defaultBaseMs = 32 + ((site.name?.charCodeAt(0) || 12) % 24);
+
+  return {
+    id: site.id,
+    name: site.name,
+    url: site.url,
+    method: site.method || "GET",
+    intervalSeconds: site.intervalSeconds || 60,
+    timeoutMs: site.timeoutMs || 10000,
+    expectedStatusCode: site.expectedStatusCode || 200,
+    monitorStatus: site.monitorStatus || "ACTIVE",
+    userId: site.userId,
+    createdAt: site.createdAt || new Date().toISOString(),
+    updatedAt: site.updatedAt || new Date().toISOString(),
+
+    // Computed client-side metrics & fallbacks
+    currentStatus: site.currentStatus || (isPaused ? "UNKNOWN" : "UP"),
+    lastResponseTimeMs: site.lastResponseTimeMs !== undefined ? site.lastResponseTimeMs : (isPaused ? 0 : defaultBaseMs),
+    uptimePercentage: site.uptimePercentage !== undefined ? site.uptimePercentage : (isPaused ? 99.85 : 99.98),
+    lastCheckedAt: site.lastCheckedAt || new Date().toISOString(),
+
+    // Multi-region relations
+    regions: Array.isArray(site.regions) && site.regions.length > 0
+      ? site.regions.map((r: any) => {
+          const regionObj = r.region || r;
+          const code = regionObj.code || "us-east-1";
+          return {
+            websiteId: r.websiteId || site.id,
+            regionId: r.regionId || regionObj.id || "reg-us-east",
+            region: {
+              id: regionObj.id || r.regionId || "reg-us-east",
+              name: regionObj.name || "Edge Region",
+              code,
+              enabled: regionObj.enabled !== false,
+              flag: regionObj.flag || getRegionFlag(code),
+            },
+          };
+        })
+      : DEFAULT_REGIONS.slice(0, 2).map((r) => ({
+          websiteId: site.id,
+          regionId: r.id,
+          region: r,
+        })),
+
+    // Real or synthetic tick sequence for timeline & latency chart
+    ticks: Array.isArray(site.ticks) && site.ticks.length > 0
+      ? site.ticks
+      : generateDefaultTicks(site),
+  };
 }
 
 export const api = {
@@ -21,17 +116,25 @@ export const api = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        const user: User = data.data || { id: "u-" + Date.now(), username, email };
+      const data = await res.json().catch(() => ({}));
+
+      // Backend returns 201 with { message: "user registered successfully" }
+      if (res.status === 201 || data?.message === "user registered successfully") {
+        // Automatically login the user so they get the sessionId cookie from Express backend
+        const loginRes = await api.login(username, password);
+        if (loginRes.success && loginRes.user) {
+          return { success: true, user: loginRes.user };
+        }
+        const user: User = { id: "u-" + Date.now(), username, email };
         setStoredUser(user);
         return { success: true, user };
       }
+
       if (!res.ok) {
-        return { success: false, message: data.message || "Registration failed" };
+        return { success: false, message: data?.message || "Registration failed" };
       }
     } catch {
-      // Backend not running / fallback
+      // Backend offline / network fallback
     }
 
     // Client fallback
@@ -47,28 +150,42 @@ export const api = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier, password }),
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        const user: User = data.data || { id: "u-" + Date.now(), username: identifier, email: `${identifier}@example.com` };
+      const data = await res.json().catch(() => ({}));
+
+      // Backend returns 200 with { message: "logged in successfully" } and sets sessionId cookie
+      if (res.status === 200 || data?.message === "logged in successfully") {
+        const user: User = {
+          id: "u-" + identifier,
+          username: identifier,
+          email: identifier.includes("@") ? identifier : `${identifier}@watchtower.dev`,
+        };
         setStoredUser(user);
         return { success: true, user };
       }
-      if (!res.ok) {
-        return { success: false, message: data.message || "Invalid credentials" };
+
+      if (res.status === 401 || !res.ok) {
+        return { success: false, message: data?.message || "Invalid credentials" };
       }
     } catch {
-      // Backend not running / fallback
+      // Backend offline / network fallback
     }
 
     // Client fallback
-    const user: User = { id: "u-" + Date.now(), username: identifier, email: identifier.includes("@") ? identifier : `${identifier}@watchtower.dev` };
+    const user: User = {
+      id: "u-" + Date.now(),
+      username: identifier,
+      email: identifier.includes("@") ? identifier : `${identifier}@watchtower.dev`,
+    };
     setStoredUser(user);
     return { success: true, user };
   },
 
   async logout(): Promise<void> {
     try {
-      await fetchWithTimeout("/api/auth/logout", { method: "POST" });
+      await fetchWithTimeout("/api/auth/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
     } catch {
       // ignore
     }
@@ -76,18 +193,7 @@ export const api = {
   },
 
   async getMe(): Promise<User | null> {
-    try {
-      const res = await fetchWithTimeout("/api/auth/me");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.data) {
-          setStoredUser(data.data);
-          return data.data;
-        }
-      }
-    } catch {
-      // ignore
-    }
+    // Return stored user or default
     return getStoredUser();
   },
 
@@ -97,8 +203,14 @@ export const api = {
       const res = await fetchWithTimeout("/api/regions");
       if (res.ok) {
         const data = await res.json();
-        if (data.success && Array.isArray(data.data)) {
-          return data.data;
+        if (data?.success && Array.isArray(data.data) && data.data.length > 0) {
+          return data.data.map((r: any) => ({
+            id: r.id,
+            name: r.name,
+            code: r.code,
+            enabled: r.enabled !== false,
+            flag: getRegionFlag(r.code),
+          }));
         }
       }
     } catch {
@@ -113,8 +225,8 @@ export const api = {
       const res = await fetchWithTimeout("/api/websites");
       if (res.ok) {
         const data = await res.json();
-        if (data.success && Array.isArray(data.data)) {
-          return data.data;
+        if (data?.success && Array.isArray(data.data)) {
+          return data.data.map(enrichWebsite);
         }
       }
     } catch {
@@ -128,8 +240,8 @@ export const api = {
       const res = await fetchWithTimeout(`/api/websites/${id}`);
       if (res.ok) {
         const data = await res.json();
-        if (data.success && data.data) {
-          return data.data;
+        if (data?.success && data.data) {
+          return enrichWebsite(data.data);
         }
       }
     } catch {
@@ -154,14 +266,23 @@ export const api = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.data) {
-          return data.data;
-        }
+      const data = await res.json().catch(() => null);
+
+      if (res.ok && data?.success && data?.data) {
+        const enriched = enrichWebsite(data.data);
+        const current = getStoredWebsites();
+        saveStoredWebsites([enriched, ...current.filter((w) => w.id !== enriched.id)]);
+        return enriched;
       }
-    } catch {
-      // fallback
+
+      if (!res.ok && data?.message) {
+        throw new Error(data.message);
+      }
+    } catch (err: any) {
+      if (err?.message && !err.message.includes("fetch") && !err.message.includes("abort") && !err.message.includes("network")) {
+        throw err;
+      }
+      // fallback to mock creation if backend is offline
     }
 
     const current = getStoredWebsites();
@@ -181,7 +302,7 @@ export const api = {
       lastCheckedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      regions: selectedRegions.map((r) => ({
+      regions: (selectedRegions.length > 0 ? selectedRegions : DEFAULT_REGIONS.slice(0, 2)).map((r) => ({
         websiteId: `web-${Date.now()}`,
         regionId: r.id,
         region: r,
@@ -204,14 +325,55 @@ export const api = {
     return newWebsite;
   },
 
+  async updateWebsite(id: string, input: {
+    name?: string;
+    url?: string;
+    method?: string;
+    intervalSeconds?: number;
+    timeoutMs?: number;
+    expectedStatusCode?: number;
+  }): Promise<Website | null> {
+    try {
+      const res = await fetchWithTimeout(`/api/websites/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.success && data?.data) {
+        return enrichWebsite(data.data);
+      }
+      if (!res.ok && data?.message) {
+        throw new Error(data.message);
+      }
+    } catch (err: any) {
+      if (err?.message && !err.message.includes("fetch")) throw err;
+    }
+
+    const current = getStoredWebsites();
+    const updated = current.map((w) => {
+      if (w.id === id) {
+        return {
+          ...w,
+          ...input,
+          method: (input.method as any) || w.method,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return w;
+    });
+    saveStoredWebsites(updated);
+    return updated.find((w) => w.id === id) || null;
+  },
+
   async togglePause(id: string, currentStatus: "ACTIVE" | "PAUSED"): Promise<Website | null> {
     const isPaused = currentStatus === "PAUSED";
     const endpoint = isPaused ? `/api/websites/${id}/resume` : `/api/websites/${id}/pause`;
     try {
       const res = await fetchWithTimeout(endpoint, { method: "POST" });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.data) return data.data;
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.success && data?.data) {
+        return enrichWebsite(data.data);
       }
     } catch {
       // fallback
@@ -236,7 +398,11 @@ export const api = {
   async deleteWebsite(id: string): Promise<boolean> {
     try {
       const res = await fetchWithTimeout(`/api/websites/${id}`, { method: "DELETE" });
-      if (res.ok) return true;
+      if (res.ok) {
+        const current = getStoredWebsites();
+        saveStoredWebsites(current.filter((w) => w.id !== id));
+        return true;
+      }
     } catch {
       // fallback
     }
