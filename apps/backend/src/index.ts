@@ -8,9 +8,6 @@ if (!process.env.DATABASE_URL) {
 if (!process.env.REDIS_URL) {
   dotenv.config({ path: "../../packages/redis/.env" });
 }
-if (!process.env.REDIS_URL) {
-  dotenv.config({ path: "../tests/.env" });
-}
 
 import express from "express";
 import type { ErrorRequestHandler } from "express";

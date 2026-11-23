@@ -1,14 +1,7 @@
 import { createClient } from "redis";
 import dotenv from "dotenv";
-import { fileURLToPath } from "node:url";
 
-// Load environment variables if REDIS_URL is not already in process.env
-if (!process.env.REDIS_URL) {
-  dotenv.config({ path: fileURLToPath(new URL("../.env", import.meta.url)) });
-}
-if (!process.env.REDIS_URL) {
-  dotenv.config({ path: fileURLToPath(new URL("../../apps/tests/.env", import.meta.url)) });
-}
+dotenv.config();
 
 export type RedisClient = ReturnType<typeof createClient>;
 
