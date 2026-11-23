@@ -203,10 +203,16 @@ export const api = {
           return user;
         }
       }
+      // Backend is reachable but said no session → clear stale cache
+      if (res.status === 401) {
+        setStoredUser(null);
+        return null;
+      }
     } catch {
-      // ignore
+      // Network error / backend offline → fall back to localStorage
+      return getStoredUser();
     }
-    return getStoredUser();
+    return null;
   },
 
   async requestPasswordReset(email: string): Promise<{ success: boolean; message: string; debugLink?: string }> {

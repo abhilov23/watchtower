@@ -2,14 +2,20 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getStoredUser } from "../lib/store";
+import { setStoredUser } from "../lib/store";
+import { api } from "../lib/api";
 import { User } from "../lib/types";
 
 export function Navbar() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    setUser(getStoredUser());
+    // Always verify against the real session cookie via /api/auth/me.
+    // If the backend says no session (401), clear any stale localStorage user.
+    api.getMe().then((u) => {
+      setUser(u);
+      if (!u) setStoredUser(null); // wipe stale cached user
+    });
   }, []);
 
   return (
