@@ -113,7 +113,7 @@ export function DashboardHeader({
                 {((user?.username || "U")[0] || "U").toUpperCase()}
               </div>
               <span style={{ fontSize: "13px", fontWeight: 500, color: "#FFFFFF" }}>
-                {user?.username || "alex_engineer"}
+                {user?.username || "Account"}
               </span>
             </div>
 

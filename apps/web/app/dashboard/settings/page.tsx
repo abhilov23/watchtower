@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardHeader } from "../../../components/DashboardHeader";
 import { Icons } from "../../../components/Icons";
 import { api } from "../../../lib/api";
 import { User } from "../../../lib/types";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -21,14 +23,16 @@ export default function SettingsPage() {
   useEffect(() => {
     async function loadUser() {
       const u = await api.getMe();
-      setUser(u);
-      if (u) {
-        setUsername(u.username || "");
-        setEmail(u.email || "");
+      if (!u) {
+        router.push("/login");
+        return;
       }
+      setUser(u);
+      setUsername(u.username || "");
+      setEmail(u.email || "");
     }
     loadUser();
-  }, []);
+  }, [router]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();

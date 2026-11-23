@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { DashboardHeader } from "../../../components/DashboardHeader";
 import { Icons } from "../../../components/Icons";
 import { CreateStatusPageModal } from "../../../components/CreateStatusPageModal";
@@ -10,6 +11,7 @@ import { api } from "../../../lib/api";
 import { User, StatusPage, Website } from "../../../lib/types";
 
 export function StatusPagesView() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [statusPages, setStatusPages] = useState<StatusPage[]>([]);
   const [websites, setWebsites] = useState<Website[]>([]);
@@ -22,18 +24,22 @@ export function StatusPagesView() {
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const [u, pages, sites] = await Promise.all([
-        api.getMe(),
+      const u = await api.getMe();
+      if (!u) {
+        router.push("/login");
+        return;
+      }
+      setUser(u);
+      const [pages, sites] = await Promise.all([
         api.getStatusPages(),
         api.getWebsites(),
       ]);
-      setUser(u);
       setStatusPages(pages);
       setWebsites(sites);
       setLoading(false);
     }
     loadData();
-  }, []);
+  }, [router]);
 
   const handleDelete = async (id: string, name: string) => {
     if (confirm(`Are you sure you want to delete status page "${name}"?`)) {

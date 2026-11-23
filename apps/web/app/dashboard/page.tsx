@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { DashboardHeader } from "../../components/DashboardHeader";
 import { CreateMonitorModal } from "../../components/CreateMonitorModal";
 import { UptimeTimeline } from "../../components/UptimeTimeline";
@@ -10,6 +11,7 @@ import { api } from "../../lib/api";
 import { Website, User } from "../../lib/types";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [websites, setWebsites] = useState<Website[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,16 +22,18 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const [userRes, sites] = await Promise.all([
-        api.getMe(),
-        api.getWebsites(),
-      ]);
+      const userRes = await api.getMe();
+      if (!userRes) {
+        router.push("/login");
+        return;
+      }
       setUser(userRes);
+      const sites = await api.getWebsites();
       setWebsites(sites);
       setLoading(false);
     }
     loadData();
-  }, []);
+  }, [router]);
 
   const handleCreated = (newSite: Website) => {
     setWebsites([newSite, ...websites]);

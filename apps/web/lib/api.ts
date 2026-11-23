@@ -128,10 +128,13 @@ export const api = {
 
       // Backend returns 201 with { message: "user registered successfully" }
       if (res.status === 201 || data?.message === "user registered successfully") {
-        // Automatically login the user so they get the sessionId cookie from Express backend
         const loginRes = await api.login(username, password);
         if (loginRes.success && loginRes.user) {
           return { success: true, user: loginRes.user };
+        }
+        const me = await api.getMe();
+        if (me) {
+          return { success: true, user: me };
         }
         const user: User = { id: "u-" + Date.now(), username, email };
         setStoredUser(user);
@@ -142,13 +145,10 @@ export const api = {
         return { success: false, message: data?.message || "Registration failed" };
       }
     } catch {
-      // Backend offline / network fallback
+      return { success: false, message: "Unable to connect to backend server." };
     }
 
-    // Client fallback
-    const user: User = { id: "u-" + Date.now(), username, email };
-    setStoredUser(user);
-    return { success: true, user };
+    return { success: false, message: "Registration failed." };
   },
 
   async login(identifier: string, password: string): Promise<{ success: boolean; message?: string; user?: User }> {
@@ -162,6 +162,10 @@ export const api = {
 
       // Backend returns 200 with { message: "logged in successfully" } and sets sessionId cookie
       if (res.status === 200 || data?.message === "logged in successfully") {
+        const me = await api.getMe();
+        if (me) {
+          return { success: true, user: me };
+        }
         const user: User = {
           id: "u-" + identifier,
           username: identifier,
@@ -175,17 +179,10 @@ export const api = {
         return { success: false, message: data?.message || "Invalid credentials" };
       }
     } catch {
-      // Backend offline / network fallback
+      return { success: false, message: "Unable to connect to backend server." };
     }
 
-    // Client fallback
-    const user: User = {
-      id: "u-" + Date.now(),
-      username: identifier,
-      email: identifier.includes("@") ? identifier : `${identifier}@watchtower.dev`,
-    };
-    setStoredUser(user);
-    return { success: true, user };
+    return { success: false, message: "Invalid credentials" };
   },
 
   async logout(): Promise<void> {
@@ -198,6 +195,7 @@ export const api = {
       // ignore
     }
     setStoredUser(null);
+    saveStoredWebsites([]);
   },
 
   async getMe(): Promise<User | null> {
@@ -367,13 +365,19 @@ export const api = {
       if (res.ok) {
         const data = await res.json();
         if (data?.success && Array.isArray(data.data)) {
-          return data.data.map(enrichWebsite);
+          const list = data.data.map(enrichWebsite);
+          saveStoredWebsites(list);
+          return list;
         }
       }
+      if (res.status === 401) {
+        return [];
+      }
     } catch {
-      // fallback
+      // offline fallback
+      return getStoredWebsites();
     }
-    return getStoredWebsites();
+    return [];
   },
 
   async getWebsiteById(id: string): Promise<Website | null> {
@@ -384,6 +388,9 @@ export const api = {
         if (data?.success && data.data) {
           return enrichWebsite(data.data);
         }
+      }
+      if (res.status === 404 || res.status === 401) {
+        return null;
       }
     } catch {
       // fallback
@@ -401,69 +408,25 @@ export const api = {
     expectedStatusCode?: number;
     regionIds: string[];
   }): Promise<Website> {
-    try {
-      const res = await fetchWithTimeout("/api/websites", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      });
-      const data = await res.json().catch(() => null);
+    const res = await fetchWithTimeout("/api/websites", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    const data = await res.json().catch(() => null);
 
-      if (res.ok && data?.success && data?.data) {
-        const enriched = enrichWebsite(data.data);
-        const current = getStoredWebsites();
-        saveStoredWebsites([enriched, ...current.filter((w) => w.id !== enriched.id)]);
-        return enriched;
-      }
-
-      if (!res.ok && data?.message) {
-        throw new Error(data.message);
-      }
-    } catch (err: any) {
-      if (err?.message && !err.message.includes("fetch") && !err.message.includes("abort") && !err.message.includes("network")) {
-        throw err;
-      }
-      // fallback to mock creation if backend is offline
+    if (res.ok && data?.success && data?.data) {
+      const enriched = enrichWebsite(data.data);
+      const current = getStoredWebsites();
+      saveStoredWebsites([enriched, ...current.filter((w) => w.id !== enriched.id)]);
+      return enriched;
     }
 
-    const current = getStoredWebsites();
-    const selectedRegions = DEFAULT_REGIONS.filter((r) => input.regionIds.includes(r.id));
-    const newWebsite: Website = {
-      id: `web-${Date.now()}`,
-      name: input.name,
-      url: input.url,
-      method: (input.method as any) || "GET",
-      intervalSeconds: input.intervalSeconds || 60,
-      timeoutMs: input.timeoutMs || 10000,
-      expectedStatusCode: input.expectedStatusCode || 200,
-      monitorStatus: "ACTIVE",
-      currentStatus: "UP",
-      lastResponseTimeMs: Math.floor(25 + Math.random() * 45),
-      uptimePercentage: 100.0,
-      lastCheckedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      regions: (selectedRegions.length > 0 ? selectedRegions : DEFAULT_REGIONS.slice(0, 2)).map((r) => ({
-        websiteId: `web-${Date.now()}`,
-        regionId: r.id,
-        region: r,
-      })),
-      ticks: [
-        {
-          id: `tick-${Date.now()}`,
-          websiteId: `web-${Date.now()}`,
-          regionId: selectedRegions[0]?.id || "reg-us-east",
-          status: "UP",
-          statusCode: input.expectedStatusCode || 200,
-          responseTimeMs: Math.floor(25 + Math.random() * 45),
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    };
+    if (!res.ok && data?.message) {
+      throw new Error(data.message);
+    }
 
-    const updated = [newWebsite, ...current];
-    saveStoredWebsites(updated);
-    return newWebsite;
+    throw new Error("Failed to create monitor. Please check your backend connection.");
   },
 
   async updateWebsite(id: string, input: {
@@ -474,83 +437,46 @@ export const api = {
     timeoutMs?: number;
     expectedStatusCode?: number;
   }): Promise<Website | null> {
-    try {
-      const res = await fetchWithTimeout(`/api/websites/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      });
-      const data = await res.json().catch(() => null);
-      if (res.ok && data?.success && data?.data) {
-        return enrichWebsite(data.data);
-      }
-      if (!res.ok && data?.message) {
-        throw new Error(data.message);
-      }
-    } catch (err: any) {
-      if (err?.message && !err.message.includes("fetch")) throw err;
-    }
-
-    const current = getStoredWebsites();
-    const updated = current.map((w) => {
-      if (w.id === id) {
-        return {
-          ...w,
-          ...input,
-          method: (input.method as any) || w.method,
-          updatedAt: new Date().toISOString(),
-        };
-      }
-      return w;
+    const res = await fetchWithTimeout(`/api/websites/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
     });
-    saveStoredWebsites(updated);
-    return updated.find((w) => w.id === id) || null;
+    const data = await res.json().catch(() => null);
+    if (res.ok && data?.success && data?.data) {
+      const enriched = enrichWebsite(data.data);
+      const current = getStoredWebsites();
+      saveStoredWebsites(current.map((w) => (w.id === id ? enriched : w)));
+      return enriched;
+    }
+    if (!res.ok && data?.message) {
+      throw new Error(data.message);
+    }
+    return null;
   },
 
   async togglePause(id: string, currentStatus: "ACTIVE" | "PAUSED"): Promise<Website | null> {
     const isPaused = currentStatus === "PAUSED";
     const endpoint = isPaused ? `/api/websites/${id}/resume` : `/api/websites/${id}/pause`;
-    try {
-      const res = await fetchWithTimeout(endpoint, { method: "POST" });
-      const data = await res.json().catch(() => null);
-      if (res.ok && data?.success && data?.data) {
-        return enrichWebsite(data.data);
-      }
-    } catch {
-      // fallback
+    const res = await fetchWithTimeout(endpoint, { method: "POST" });
+    const data = await res.json().catch(() => null);
+    if (res.ok && data?.success && data?.data) {
+      const enriched = enrichWebsite(data.data);
+      const current = getStoredWebsites();
+      saveStoredWebsites(current.map((w) => (w.id === id ? enriched : w)));
+      return enriched;
     }
-
-    const current = getStoredWebsites();
-    const updated = current.map((w) => {
-      if (w.id === id) {
-        const nextStatus: "ACTIVE" | "PAUSED" = isPaused ? "ACTIVE" : "PAUSED";
-        return {
-          ...w,
-          monitorStatus: nextStatus,
-          currentStatus: nextStatus === "PAUSED" ? ("UNKNOWN" as const) : ("UP" as const),
-        };
-      }
-      return w;
-    });
-    saveStoredWebsites(updated);
-    return updated.find((w) => w.id === id) || null;
+    return null;
   },
 
   async deleteWebsite(id: string): Promise<boolean> {
-    try {
-      const res = await fetchWithTimeout(`/api/websites/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        const current = getStoredWebsites();
-        saveStoredWebsites(current.filter((w) => w.id !== id));
-        return true;
-      }
-    } catch {
-      // fallback
+    const res = await fetchWithTimeout(`/api/websites/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      const current = getStoredWebsites();
+      saveStoredWebsites(current.filter((w) => w.id !== id));
+      return true;
     }
-    const current = getStoredWebsites();
-    const updated = current.filter((w) => w.id !== id);
-    saveStoredWebsites(updated);
-    return true;
+    return false;
   },
 
   // Status Page APIs (Client Store)

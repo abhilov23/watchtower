@@ -23,16 +23,18 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const [u, site] = await Promise.all([
-        api.getMe(),
-        api.getWebsiteById(resolvedParams.id),
-      ]);
+      const u = await api.getMe();
+      if (!u) {
+        router.push("/login");
+        return;
+      }
       setUser(u);
+      const site = await api.getWebsiteById(resolvedParams.id);
       setWebsite(site);
       setLoading(false);
     }
     load();
-  }, [resolvedParams.id]);
+  }, [resolvedParams.id, router]);
 
   const handleTogglePause = async () => {
     if (!website) return;

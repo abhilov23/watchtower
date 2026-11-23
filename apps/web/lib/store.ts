@@ -128,16 +128,13 @@ const STORAGE_KEY = "watchtower_websites_v1";
 const USER_KEY = "watchtower_user_v1";
 
 export function getStoredWebsites(): Website[] {
-  if (typeof window === "undefined") return INITIAL_WEBSITES;
+  if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_WEBSITES));
-      return INITIAL_WEBSITES;
-    }
+    if (!raw) return [];
     return JSON.parse(raw);
   } catch {
-    return INITIAL_WEBSITES;
+    return [];
   }
 }
 
@@ -154,11 +151,7 @@ export function getStoredUser(): User | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(USER_KEY);
-    if (!raw) {
-      const defaultUser: User = { id: "demo-user", username: "alex_engineer", email: "alex@watchtower.dev" };
-      localStorage.setItem(USER_KEY, JSON.stringify(defaultUser));
-      return defaultUser;
-    }
+    if (!raw) return null;
     return JSON.parse(raw);
   } catch {
     return null;
