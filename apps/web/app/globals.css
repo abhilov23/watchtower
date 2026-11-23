@@ -560,12 +560,16 @@ select.form-input option {
   opacity: 0.7;
 }
 
-/* Subtle tech grid background */
+/* Subtle tech grid background layer */
 .tech-grid-bg {
+  position: absolute;
+  inset: 0;
   background-image: radial-gradient(rgba(114, 125, 161, 0.12) 1px, transparent 1px);
   background-size: 28px 28px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, black 40%, transparent 80%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, black 40%, transparent 80%);
+  mask-image: radial-gradient(ellipse 80% 50% at 50% 10%, black 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 50% at 50% 10%, black 30%, transparent 75%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* 2. Infinite Continuous Marquee Scroll */

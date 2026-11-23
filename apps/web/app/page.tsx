@@ -28,13 +28,14 @@ export default function HomePage() {
       <main style={{ flex: 1 }}>
         {/* HERO SECTION (Exact Better Stack Clone) */}
         {/* HERO SECTION */}
-        <section className="tech-grid-bg" style={{
+        <section style={{
           padding: "70px 0 60px",
           position: "relative",
           textAlign: "center",
           overflow: "hidden",
         }}>
-          {/* Better Stack Atmosphere Flare & Light Cones */}
+          {/* Background Grid & Better Stack Atmosphere Flare */}
+          <div className="tech-grid-bg" />
           <div className="hero-flare" />
           <div className="hero-flare-cone" />
 
