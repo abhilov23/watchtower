@@ -596,7 +596,7 @@ export default function MonitorDetailPage({
                       {t.responseTimeMs} ms
                     </td>
                     <td style={{ padding: "12px", color: "var(--text-muted)" }}>
-                      US East (N. Virginia)
+                      {t.region?.name || t.region?.code || "Edge Region"}
                     </td>
                   </tr>
                 ))}
