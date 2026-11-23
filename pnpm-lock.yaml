@@ -23,6 +23,9 @@ importers:
       '@watchtower/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@watchtower/redis':
+        specifier: workspace:*
+        version: link:../../packages/redis
       argon2:
         specifier: ^0.45.2
         version: 0.45.2
@@ -44,9 +47,6 @@ importers:
       prettier:
         specifier: 3.9.6
         version: 3.9.6
-      redis:
-        specifier: ^6.3.1
-        version: 6.3.1
       resend:
         specifier: ^6.39.0
         version: 6.39.0
@@ -220,6 +220,25 @@ importers:
       globals:
         specifier: 17.12.0
         version: 17.12.0
+
+  packages/redis:
+    dependencies:
+      dotenv:
+        specifier: ^18.0.10
+        version: 18.0.10
+      redis:
+        specifier: ^6.3.1
+        version: 6.3.1
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: 26.4.1
+        version: 26.4.1
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
 
   packages/typescript-config: {}
 

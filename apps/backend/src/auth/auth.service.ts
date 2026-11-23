@@ -1,6 +1,6 @@
 import argon2 from "argon2";
 import { prismaClient } from "@watchtower/db";
-import { getRedis } from "../lib/redis.js";
+import { getRedis } from "@watchtower/redis";
 import { sendPasswordResetEmail } from "../lib/resend.js";
 import crypto from "crypto";
 
