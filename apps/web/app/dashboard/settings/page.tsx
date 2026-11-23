@@ -9,8 +9,6 @@ import { User } from "../../../lib/types";
 export default function SettingsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [emailAlerts, setEmailAlerts] = useState(true);
-  const [slackAlerts, setSlackAlerts] = useState(true);
-  const [smsAlerts, setSmsAlerts] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -81,55 +79,6 @@ export default function SettingsPage() {
                 />
               </div>
 
-              {/* Slack */}
-              <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: "var(--radius-md)",
-                backgroundColor: "#0D0F1A",
-                border: "1px solid rgba(114, 125, 161, 0.14)",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <Icons.Bell size={18} color="var(--primary-light)" />
-                  <div>
-                    <div style={{ fontSize: "14px", fontWeight: 500, color: "#FFFFFF" }}>Slack Webhook</div>
-                    <div style={{ fontSize: "12px", color: "var(--text-dim)" }}>Connected to #incident-response channel</div>
-                  </div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={slackAlerts}
-                  onChange={(e) => setSlackAlerts(e.target.checked)}
-                  style={{ width: "16px", height: "16px", accentColor: "var(--primary-color)", cursor: "pointer" }}
-                />
-              </div>
-
-              {/* SMS */}
-              <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: "var(--radius-md)",
-                backgroundColor: "#0D0F1A",
-                border: "1px solid rgba(114, 125, 161, 0.14)",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <Icons.Zap size={18} color="var(--primary-light)" />
-                  <div>
-                    <div style={{ fontSize: "14px", fontWeight: 500, color: "#FFFFFF" }}>Voice Call & SMS Escalations</div>
-                    <div style={{ fontSize: "12px", color: "var(--text-dim)" }}>Wakes up the on-call engineer at 3 AM</div>
-                  </div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={smsAlerts}
-                  onChange={(e) => setSmsAlerts(e.target.checked)}
-                  style={{ width: "16px", height: "16px", accentColor: "var(--primary-color)", cursor: "pointer" }}
-                />
-              </div>
             </div>
           </div>
 

@@ -425,7 +425,6 @@ export default function HomePage() {
                   <li>✓ <strong>50 monitors</strong></li>
                   <li>✓ <strong>30-second check intervals</strong></li>
                   <li>✓ Unlimited status pages with custom domains</li>
-                  <li>✓ SMS & voice call phone alerts</li>
                   <li>✓ Multi-region checks</li>
                 </ul>
                 <Link href="/register" className="cta-button btn" style={{ width: "100%", height: "42px" }}>
