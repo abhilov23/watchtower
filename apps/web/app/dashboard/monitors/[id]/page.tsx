@@ -8,7 +8,6 @@ import { LatencyChart } from "../../../../components/LatencyChart";
 import { UptimeTimeline } from "../../../../components/UptimeTimeline";
 import { Icons } from "../../../../components/Icons";
 import { EditMonitorModal } from "../../../../components/EditMonitorModal";
-import { RegionInspectModal } from "../../../../components/RegionInspectModal";
 import { api } from "../../../../lib/api";
 import { Website, User } from "../../../../lib/types";
 
@@ -19,7 +18,6 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [inspectingRegionId, setInspectingRegionId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -260,18 +258,12 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                 <div
                   key={idx}
                   className="card-glow-hover"
-                  onClick={() => setInspectingRegionId(wr.region?.id || wr.regionId)}
-                  title="Click to inspect probe node via GET /api/regions/:id"
                   style={{
                     padding: "14px",
                     borderRadius: "var(--radius-md)",
                     backgroundColor: "#0F121F",
                     border: "1px solid rgba(114, 125, 161, 0.14)",
-                    cursor: "pointer",
-                    transition: "border-color 0.15s ease",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--primary-light)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(114, 125, 161, 0.14)")}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -282,12 +274,9 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px", marginTop: "10px" }}>
                     <span style={{ color: "var(--text-dim)" }}>Edge Latency:</span>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <strong style={{ fontFamily: "var(--font-mono)", color: "#FFFFFF" }}>
-                        {Math.floor(25 + idx * 18)} ms
-                      </strong>
-                      <span style={{ color: "var(--primary-light)", fontSize: "11px" }}>Inspect ↗</span>
-                    </div>
+                    <strong style={{ fontFamily: "var(--font-mono)", color: "#FFFFFF" }}>
+                      {Math.floor(25 + idx * 18)} ms
+                    </strong>
                   </div>
                 </div>
               ))
@@ -354,12 +343,6 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           }}
         />
       )}
-
-      {/* Inspect Region Modal */}
-      <RegionInspectModal
-        regionId={inspectingRegionId}
-        onClose={() => setInspectingRegionId(null)}
-      />
     </div>
   );
 }

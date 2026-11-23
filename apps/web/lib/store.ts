@@ -1,4 +1,4 @@
-import { Website, Region, WebsiteTick, User } from "./types";
+import { Website, Region, WebsiteTick, User, StatusPage } from "./types";
 
 export const DEFAULT_REGIONS: Region[] = [
   { id: "reg-us-east", name: "US East (N. Virginia)", code: "us-east-1", enabled: true, flag: "🇺🇸" },
@@ -171,5 +171,42 @@ export function setStoredUser(user: User | null) {
     localStorage.removeItem(USER_KEY);
   } else {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
+  }
+}
+
+const STATUS_PAGES_KEY = "watchtower_status_pages_v1";
+
+export const INITIAL_STATUS_PAGES: StatusPage[] = [
+  {
+    id: "sp-default",
+    name: "Watchtower Live Status",
+    slug: "watchtower-live",
+    description: "Official real-time operational status for all Watchtower platform endpoints and edge clusters.",
+    isPublished: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
+
+export function getStoredStatusPages(): StatusPage[] {
+  if (typeof window === "undefined") return INITIAL_STATUS_PAGES;
+  try {
+    const raw = localStorage.getItem(STATUS_PAGES_KEY);
+    if (!raw) {
+      localStorage.setItem(STATUS_PAGES_KEY, JSON.stringify(INITIAL_STATUS_PAGES));
+      return INITIAL_STATUS_PAGES;
+    }
+    return JSON.parse(raw);
+  } catch {
+    return INITIAL_STATUS_PAGES;
+  }
+}
+
+export function saveStoredStatusPages(pages: StatusPage[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STATUS_PAGES_KEY, JSON.stringify(pages));
+  } catch (err) {
+    console.error("Failed to save status pages", err);
   }
 }

@@ -14,8 +14,7 @@ model User {
   username String @unique
   password String
 
-  websites    Website[]
-  statusPages StatusPage[]
+  websites Website[]
 }
 
 
@@ -101,28 +100,6 @@ model WebsiteTick {
   @@index([websiteId, createdAt])
   @@index([regionId, createdAt])
   @@index([websiteId, regionId, createdAt])
-}
-
-
-// ========================
-// STATUS PAGE
-// ========================
-
-model StatusPage {
-  id          String   @id @default(uuid())
-  name        String
-  slug        String   @unique
-  description String?
-  isPublished Boolean  @default(true)
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-  @@index([slug])
 }
 
 

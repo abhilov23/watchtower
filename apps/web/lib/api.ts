@@ -1,5 +1,13 @@
 import { Website, Region, WebsiteTick, User, StatusPage, PublicStatusPageData } from "./types";
-import { getStoredWebsites, saveStoredWebsites, DEFAULT_REGIONS, getStoredUser, setStoredUser } from "./store";
+import {
+  getStoredWebsites,
+  saveStoredWebsites,
+  DEFAULT_REGIONS,
+  getStoredUser,
+  setStoredUser,
+  getStoredStatusPages,
+  saveStoredStatusPages,
+} from "./store";
 
 async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 4000) {
   const controller = new AbortController();
@@ -545,30 +553,9 @@ export const api = {
     return true;
   },
 
-  // Status Page APIs
+  // Status Page APIs (Client Store)
   async getStatusPages(): Promise<StatusPage[]> {
-    try {
-      const res = await fetchWithTimeout("/api/status-pages");
-      if (res.ok) {
-        const data = await res.json();
-        if (data?.success && Array.isArray(data.data)) {
-          return data.data;
-        }
-      }
-    } catch {
-      // fallback
-    }
-    return [
-      {
-        id: "sp-default",
-        name: "Watchtower Live Status",
-        slug: "watchtower-live",
-        description: "Official real-time operational status for all Watchtower platform endpoints and edge clusters.",
-        isPublished: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ];
+    return getStoredStatusPages();
   },
 
   async createStatusPage(input: {
@@ -577,30 +564,24 @@ export const api = {
     description?: string;
     isPublished?: boolean;
   }): Promise<StatusPage> {
-    const res = await fetchWithTimeout("/api/status-pages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-    });
-    const data = await res.json().catch(() => null);
-
-    if (res.ok && data?.success && data?.data) {
-      return data.data;
+    const pages = getStoredStatusPages();
+    const cleanSlug = input.slug.toLowerCase().replace(/[^a-z0-9-]+/g, "").replace(/^-+|-+$/g, "");
+    if (pages.some((p) => p.slug === cleanSlug)) {
+      throw new Error(`The slug '${cleanSlug}' is already taken.`);
     }
 
-    if (!res.ok && data?.message) {
-      throw new Error(data.message);
-    }
-
-    return {
+    const created: StatusPage = {
       id: `sp-${Date.now()}`,
-      name: input.name,
-      slug: input.slug,
-      description: input.description || null,
+      name: input.name.trim(),
+      slug: cleanSlug,
+      description: input.description?.trim() || null,
       isPublished: input.isPublished !== false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+
+    saveStoredStatusPages([created, ...pages]);
+    return created;
   },
 
   async updateStatusPage(id: string, input: {
@@ -609,43 +590,59 @@ export const api = {
     description?: string;
     isPublished?: boolean;
   }): Promise<StatusPage | null> {
-    const res = await fetchWithTimeout(`/api/status-pages/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
+    const pages = getStoredStatusPages();
+    const updatedPages = pages.map((p) => {
+      if (p.id === id) {
+        return {
+          ...p,
+          ...(input.name ? { name: input.name.trim() } : {}),
+          ...(input.slug ? { slug: input.slug.trim() } : {}),
+          ...(input.description !== undefined ? { description: input.description } : {}),
+          ...(input.isPublished !== undefined ? { isPublished: input.isPublished } : {}),
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return p;
     });
-    const data = await res.json().catch(() => null);
 
-    if (res.ok && data?.success && data?.data) {
-      return data.data;
-    }
-
-    if (!res.ok && data?.message) {
-      throw new Error(data.message);
-    }
-
-    return null;
+    saveStoredStatusPages(updatedPages);
+    return updatedPages.find((p) => p.id === id) || null;
   },
 
   async deleteStatusPage(id: string): Promise<boolean> {
-    const res = await fetchWithTimeout(`/api/status-pages/${id}`, {
-      method: "DELETE",
-    });
-    return res.ok;
+    const pages = getStoredStatusPages();
+    saveStoredStatusPages(pages.filter((p) => p.id !== id));
+    return true;
   },
 
   async getPublicStatusPage(slug: string): Promise<PublicStatusPageData | null> {
-    try {
-      const res = await fetchWithTimeout(`/api/status-pages/public/${slug}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data?.success && data.data) {
-          return data.data;
-        }
-      }
-    } catch {
-      // fallback
-    }
-    return null;
+    const pages = getStoredStatusPages();
+    const found = pages.find((p) => p.slug === slug);
+    const websites = await api.getWebsites();
+    const activeMonitors = websites.filter((w) => w.monitorStatus === "ACTIVE");
+
+    if (!found) return null;
+
+    const monitors = activeMonitors.map((w) => ({
+      id: w.id,
+      name: w.name,
+      url: w.url,
+      method: w.method,
+      status: w.currentStatus || "UP",
+      lastChecked: w.lastCheckedAt || new Date().toISOString(),
+      responseTimeMs: w.lastResponseTimeMs || 35,
+    }));
+
+    const hasOutage = monitors.some((m) => m.status === "DOWN");
+
+    return {
+      id: found.id,
+      name: found.name,
+      slug: found.slug,
+      description: found.description,
+      overallStatus: hasOutage ? "DEGRADED" : "OPERATIONAL",
+      updatedAt: found.updatedAt,
+      monitors,
+    };
   },
 };
